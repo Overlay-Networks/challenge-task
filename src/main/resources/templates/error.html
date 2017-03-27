@@ -64,6 +64,9 @@ a, a[href], a:active, a:hover, a:visited {
 .container .subtitle {
 	font-weight: 400;
 }
+.container .subtitle+.subtitle {
+	margin-top: 12px;
+}
 .container-bottom {
 	display: block;
 	width: 100%;
@@ -83,6 +86,7 @@ a, a[href], a:active, a:hover, a:visited {
 		<div class="container">
 			<h1><i class="fa fa-bug"></i> An error occurred</h1>
 			<p class="subtitle">Unfortunately, an error occurred while trying to serve your web site. We are doing all we can to solve your problem. Please contact us, if this should happen again.</p>
+			<p class="subtitle">If you only want to see the API, <a href="/swagger-ui.html">please click here</a>.</p>
 		</div>
 		<div class="container-bottom"></div>
 	</div>
