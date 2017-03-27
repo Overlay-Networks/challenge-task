@@ -23,7 +23,7 @@ public class SwaggerConfig {
 				.apiInfo(apiInfo())
 				.select()
 				.apis(any())
-				.paths(regex("^.*$"))
+				.paths(regex("^(?!/error$).*$"))
 				.build();
 	}
 
