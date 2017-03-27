@@ -14,7 +14,7 @@ public class MessageController {
 		method = GET,
 		produces = APPLICATION_JSON_UTF8_VALUE)
 	public String getMessage() {
-		return null;
+		return "message";
 	}
 
 }
