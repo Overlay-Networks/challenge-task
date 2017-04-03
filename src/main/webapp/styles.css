@@ -177,14 +177,20 @@ input, textarea {
 }
 #messenger .message-box .message {
 	border: 1px solid #e2e2e2;
-	padding: 5px 10px;
+	padding: 7px 12px;
 	background: white;
-	border-radius: 10px;
+	border-radius: 12px;
 	display: inline-block;
 	font-size: 14px;
 	box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.2);
 	max-width: 40%;
 	color: #444;
+}
+#messenger .message-box .message-row.left .message {
+	border-bottom-left-radius: 1px;
+}
+#messenger .message-box .message-row.right .message {
+	border-bottom-right-radius: 1px;
 }
 
 #messenger .input {
