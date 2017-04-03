@@ -1,13 +1,8 @@
-# challenge-task
-Main repository for the challenge task
+# Challenge Task: Group 1
+The challenge task in the lecture Overlay Networks at the University of Zurich.
 
 ## Running the application
-- You need to install the front-end dependencies, if you want to have a functional front-end.
-  - Install `node.js`
-  - (optional) Install `yarn` for an improved dependency management by running `npm install -g yarn`
-  - Go to the folder `src/main/webapp` and run either `npm install` or `yarn install`
-
-- You need to install the back-end dependencies
+- You need to install the `maven` dependencies
   - Run `./mvnw install` in the project directory
 
 - Run the application by running `src/main/java/com/uzh/csg/overlaynetworks/Application.java` as a Java application.
