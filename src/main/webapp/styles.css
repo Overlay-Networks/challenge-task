@@ -65,7 +65,7 @@ body, html {
 #messenger .contacts .contact.selected {
 	background: #efefef;
 }
-#messenger .contacts .contact .user {
+#messenger .contact .user {
 	width: 1.8em;
 	height: 1.8em;
 	display: inline-block;
@@ -73,13 +73,41 @@ body, html {
 	background: url('/user.svg');
 	margin-right: 0.5em;
 }
-#messenger .contacts .contact .name {
+#messenger .contact .name {
 	display: inline-block;
 	vertical-align: middle;
 }
 
+#messenger .receiver {
+	height: 50px;
+	width: 100%;
+	background: #f8f8f8;
+	position: relative;
+	border-left: 1px solid #e3e3e3;
+}
+#messenger .receiver > div {
+	position: absolute;
+	top: 50%;
+	left: 20px;
+	transform: translateY(-50%);
+}
+#messenger .receiver .to {
+	margin-right: 20px;
+	display: inline-block;
+	vertical-align: middle;
+}
+#messenger .receiver .contact {
+	display: inline-block;
+	vertical-align: middle;
+}
+#messenger .receiver .contact .user {
+	width: 1.5em;
+	height: 1.5em;
+	margin-right: 0.4em;
+}
+
 #messenger .message-box {
-	height: calc(90vh - 64px);
+	height: calc(90vh - 50px - 64px);
 	background: #7fa4d2;
 	overflow-y: scroll;
 	box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
