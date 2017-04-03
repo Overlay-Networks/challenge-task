@@ -2,7 +2,7 @@ body, html {
 	margin: 0;
 	padding: 0;
 	height: 100%;
-	background: #f6f6f6;
+	background: #4d8592;
 	font-family: Roboto, Arial, Verdana, sans-serif;
 }
 
@@ -15,8 +15,9 @@ body, html {
 	position: absolute;
 	top: 50vh;
 	left: 50vw;
-	box-shadow: 0 0 1em rgba(0,0,0,0.13);
+	box-shadow: 0 0 2em rgba(0,0,0,0.2);
 	overflow: hidden;
+	border-radius: 0.2em;
 }
 #messenger .left-column {
 	display: block;
@@ -24,6 +25,7 @@ body, html {
 	width: 25%;
 	position: relative;
 	z-index: 2;
+	border-right: 1px solid #b6b6b6;
 }
 #messenger .right-column {
 	display: block;
@@ -83,7 +85,7 @@ body, html {
 	width: 100%;
 	background: #f8f8f8;
 	position: relative;
-	border-left: 1px solid #e3e3e3;
+	border-bottom: 1px solid #b6b6b6;
 }
 #messenger .receiver > div {
 	position: absolute;
@@ -108,14 +110,57 @@ body, html {
 
 #messenger .message-box {
 	height: calc(90vh - 50px - 64px);
+	padding-top: 30px;
+	padding-bottom: 30px;
 	background: #7fa4d2;
+	background: url('background.png');
 	overflow-y: scroll;
-	box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
 }
+#messenger .message-box .no-message {
+	text-transform: uppercase;
+	font-weight: 300;
+	font-size: 32px;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%,-50%);
+	text-align: center;
+	color: #c1c1c1;
+	width: 35%;
+	line-height: 1.3;
+}
+#messenger .message-box .no-message .fa {
+	display: block;
+	margin-bottom: 0.2em;
+	font-size: 80px;
+}
+#messenger .message-box .message-row {
+	display: block;
+	padding: 3px 35px 3px 35px;
+}
+#messenger .message-box .message-row.right {
+	text-align: right;
+}
+#messenger .message-box .message-row.left {
+	text-align: left;
+}
+#messenger .message-box .message {
+	border: 1px solid #e2e2e2;
+	padding: 5px 10px;
+	background: white;
+	border-radius: 10px;
+	display: inline-block;
+	font-size: 14px;
+	box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.2);
+	max-width: 40%;
+	color: #444;
+}
+
 #messenger .input {
 	height: 64px;
 	background: #e0e0e0;
 	position: relative;
+	border-top: 1px solid #b6b6b6;
 }
 #messenger .input input {
 	background: white;
@@ -140,7 +185,7 @@ body, html {
 	transform: translateY(-50%);
 	font-size: 18px;
 	cursor: pointer;
-	color: #696969;
+	color: #7fa0d2;
 }
 /* increase focus */
 #messenger .input .submit:after {
