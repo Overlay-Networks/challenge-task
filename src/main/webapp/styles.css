@@ -16,7 +16,23 @@ body, html {
 	top: 50vh;
 	left: 50vw;
 	box-shadow: 0 0 1em rgba(0,0,0,0.13);
+	overflow: hidden;
 }
+#messenger .left-column {
+	display: block;
+	float: left;
+	width: 25%;
+	position: relative;
+	z-index: 2;
+}
+#messenger .right-column {
+	display: block;
+	float: left;
+	width: 75%;
+	position: relative;
+	z-index: 1;
+}
+
 #messenger .logo {
 	height: 140px;
 	width: 100%;
@@ -60,4 +76,51 @@ body, html {
 #messenger .contacts .contact .name {
 	display: inline-block;
 	vertical-align: middle;
+}
+
+#messenger .message-box {
+	height: calc(90vh - 64px);
+	background: #7fa4d2;
+	overflow-y: scroll;
+	box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+}
+#messenger .input {
+	height: 64px;
+	background: #e0e0e0;
+	position: relative;
+}
+#messenger .input input {
+	background: white;
+	border: 2px solid #e0e0e0;
+	border-radius: 0.6em;
+	width: calc(100% - 20px);
+	outline: none;
+	padding: 9px 12px;
+	transform: translate(-50%, -50%);
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transition: 0.15s ease border-color;
+}
+#messenger .input input:focus {
+	border: 2px solid #7fa0d2;
+}
+#messenger .input .submit {
+	position: absolute;
+	top: 50%;
+	right: 24px;
+	transform: translateY(-50%);
+	font-size: 18px;
+	cursor: pointer;
+	color: #696969;
+}
+/* increase focus */
+#messenger .input .submit:after {
+	content: "";
+	width: 2em;
+	height: 2em;
+	display: block;
+	position: absolute;
+	top: -0.5em;
+	left: -0.45em;
 }
