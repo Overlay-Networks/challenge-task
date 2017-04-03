@@ -1,0 +1,12 @@
+{
+  "name": "challenge-task",
+  "version": "0.0.1",
+  "description": "The challenge task of the lecture Overlay Networks at the University of Zurich.",
+  "main": "index.html",
+  "repository": "https://github.com/Overlay-Networks/challenge-task",
+  "author": "CSG, IfI, University of Zurich",
+  "license": "MIT",
+  "dependencies": {
+    "font-awesome": "^4.7.0"
+  }
+}
