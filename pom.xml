@@ -23,6 +23,7 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
 		<swagger.version>2.6.1</swagger.version>
+		<version.web3j>2.1.0</version.web3j>
 	</properties>
 	
 	<dependencies>
@@ -63,6 +64,12 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 		</dependency>
+		
+		<dependency>
+            <groupId>org.web3j</groupId>
+            <artifactId>core</artifactId>
+            <version>${version.web3j}</version>
+        </dependency>
 	</dependencies>
 	
 	<build>
