@@ -1,17 +1,20 @@
 package com.uzh.csg.overlaynetworks.web.controller;
 
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.stereotype.Controller;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.uzh.csg.overlaynetworks.web.dto.Greeting;
+import com.uzh.csg.overlaynetworks.web.dto.HelloMessage;
 
-@RestController
-@RequestMapping("/message")
+@Controller
 public class MessageController {
 
-	@RequestMapping(method = GET)
-	public String getMessage() {
-		return "message";
+	@MessageMapping("/hello")
+	@SendTo("/topic/greetings")
+	public Greeting greeting(HelloMessage message) throws Exception {
+		Thread.sleep(1000); // simulated delay
+		return new Greeting("Hello, " + message.getName() + "!");
 	}
 
 }
