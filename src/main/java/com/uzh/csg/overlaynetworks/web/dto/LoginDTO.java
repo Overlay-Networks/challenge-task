@@ -1,13 +1,13 @@
 package com.uzh.csg.overlaynetworks.web.dto;
 
-public class HelloMessage {
+public class LoginDTO {
 
 	private String name;
 
-	public HelloMessage() {
+	public LoginDTO() {
 	}
 
-	public HelloMessage(String name) {
+	public LoginDTO(String name) {
 		this.name = name;
 	}
 

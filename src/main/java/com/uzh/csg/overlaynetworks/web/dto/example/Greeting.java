@@ -1,4 +1,4 @@
-package com.uzh.csg.overlaynetworks.web.dto;
+package com.uzh.csg.overlaynetworks.web.dto.example;
 
 public class Greeting {
 
