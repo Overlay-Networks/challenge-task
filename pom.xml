@@ -24,6 +24,7 @@
 		<java.version>1.8</java.version>
 		<swagger.version>2.6.1</swagger.version>
 		<version.web3j>2.1.0</version.web3j>
+		<version.assertj>3.6.2</version.assertj>			
 	</properties>
 	
 	<dependencies>
@@ -70,6 +71,14 @@
             <artifactId>core</artifactId>
             <version>${version.web3j}</version>
         </dependency>
+        
+        <dependency>
+  			<groupId>org.assertj</groupId>
+  			<artifactId>assertj-core</artifactId>
+  			<version>${version.assertj}</version>
+  			<scope>test</scope>
+		</dependency>
+                
 	</dependencies>
 	
 	<build>
