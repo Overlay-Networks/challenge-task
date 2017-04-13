@@ -108,6 +108,16 @@
 			<artifactId>tether</artifactId>
 			<version>1.4.0</version>
 		</dependency>
+		<dependency>
+			<groupId>org.webjars.bower</groupId>
+			<artifactId>vue</artifactId>
+			<version>2.2.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.webjars.bower</groupId>
+			<artifactId>vue-resource</artifactId>
+			<version>1.2.1</version>
+		</dependency>
 	</dependencies>
 	
 	<build>

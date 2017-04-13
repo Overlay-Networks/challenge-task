@@ -9,93 +9,98 @@
 <link href="/webjars/bootstrap/4.0.0-alpha.6-1/css/bootstrap.min.css" rel="stylesheet">
 <link href="/webjars/font-awesome/4.7.0/css/font-awesome.css" rel="stylesheet">
 <link href="/styles.css" rel="stylesheet">
-
-<script src="/webjars/jquery/3.1.0/jquery.min.js"></script>
-<script src="/webjars/tether/1.4.0/dist/js/tether.min.js"></script>
-<script src="/webjars/bootstrap/4.0.0-alpha.6-1/js/bootstrap.min.js"></script>
-
 </head>
+
 <body>
-	<div id="login" style="display: none;">
-		<div class="logo">
-			<div class="image"></div>
-			<div class="text">Challenge Task</div>
-		</div>
-		<label>
-			<span>User Name</span>
-			<input type="text" name="username">
-		</label>
-		<i class="submit fa fa-send"></i>
-	</div>
-	<div id="messenger">
-		<div class="left-column">
+	<div id="app" v-if="!isLoading">
+		<div id="login" v-if="!auth.authenticated">
 			<div class="logo">
 				<div class="image"></div>
 				<div class="text">Challenge Task</div>
 			</div>
-			<div class="contacts">
-				<div class="contact">
-					<div class="user"></div>
-					<div class="name">Peter Griffin</div>
-				</div>
-				<div class="contact selected">
-					<div class="user"></div>
-					<div class="name">Yuri</div>
-				</div>
-				<div class="contact">
-					<div class="user"></div>
-					<div class="name">Sebi</div>
-				</div>
-				<div class="contact">
-					<div class="user"></div>
-					<div class="name">Killer</div>
-				</div>
-				<div class="contact">
-					<div class="user"></div>
-					<div class="name">Tschonny</div>
-				</div>
-				<div class="contact">
-					<div class="user"></div>
-					<div class="name">Bart Simpson</div>
-				</div>
-			</div>
+			<label>
+				<span>User Name</span>
+				<input type="text" name="username" v-model="login.username">
+			</label>
+			<i class="submit fa fa-send" @click="submitLogin"></i>
 		</div>
-		<div class="right-column">
-			<div class="receiver">
-				<div>
-					<div class="to">To:</div>
+		<div id="messenger" v-if="auth.authenticated">
+			<div class="left-column">
+				<div class="logo">
+					<div class="image"></div>
+					<div class="text">Challenge Task</div>
+				</div>
+				<div class="contacts">
 					<div class="contact">
+						<div class="user"></div>
+						<div class="name">Peter Griffin</div>
+					</div>
+					<div class="contact selected">
 						<div class="user"></div>
 						<div class="name">Yuri</div>
 					</div>
+					<div class="contact">
+						<div class="user"></div>
+						<div class="name">Sebi</div>
+					</div>
+					<div class="contact">
+						<div class="user"></div>
+						<div class="name">Killer</div>
+					</div>
+					<div class="contact">
+						<div class="user"></div>
+						<div class="name">Tschonny</div>
+					</div>
+					<div class="contact">
+						<div class="user"></div>
+						<div class="name">Bart Simpson</div>
+					</div>
 				</div>
 			</div>
-			<div class="message-box">
-				<div class="no-message">
-					<i class="fa fa-ban"></i>
-					No message has been sent yet.
+			<div class="right-column">
+				<div class="receiver">
+					<div>
+						<div class="to">To:</div>
+						<div class="contact">
+							<div class="user"></div>
+							<div class="name">Yuri</div>
+						</div>
+					</div>
 				</div>
-				<div class="message-row left">
-					<div class="message">Hi!</div>
+				<div class="message-box">
+					<div class="no-message">
+						<i class="fa fa-ban"></i>
+						No message has been sent yet.
+					</div>
+					<div class="message-row left">
+						<div class="message">Hi!</div>
+					</div>
+					<div class="message-row left">
+						<div class="message">How are you doing? :)</div>
+					</div>
+					<div class="message-row right">
+						<div class="message">I'm fine, and you?</div>
+					</div>
+					<div class="message-row right">
+						<div class="message">What are you doing?</div>
+					</div>
+					<div class="message-row left">
+						<div class="message">Have to go. Bye.</div>
+					</div>
 				</div>
-				<div class="message-row left">
-					<div class="message">How are you doing? :)</div>
+				<div class="input">
+					<input type="text" placeholder="Write a message">
+					<i class="fa fa-send submit"></i>
 				</div>
-				<div class="message-row right">
-					<div class="message">I'm fine, and you?</div>
-				</div>
-				<div class="message-row right">
-					<div class="message">What are you doing?</div>
-				</div>
-				<div class="message-row left">
-					<div class="message">Have to go. Bye.</div>
-				</div>
-			</div>
-			<div class="input">
-				<input type="text" placeholder="Write a message">
-				<i class="fa fa-send submit"></i>
 			</div>
 		</div>
 	</div>
+	
+	<script src="/webjars/jquery/3.1.0/jquery.min.js"></script>
+	<script src="/webjars/tether/1.4.0/dist/js/tether.min.js"></script>
+	<script src="/webjars/bootstrap/4.0.0-alpha.6-1/js/bootstrap.min.js"></script>
+	<script src="/webjars/vue/2.2.4/dist/vue.js"></script>
+	<script src="/webjars/vue-resource/1.2.1/dist/vue-resource.js"></script>
+	<script src="/app.js"></script>
 </body>
 </html>
