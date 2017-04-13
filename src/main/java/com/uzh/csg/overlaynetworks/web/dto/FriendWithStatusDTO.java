@@ -9,6 +9,7 @@ public class FriendWithStatusDTO {
 		this.friend = friend;
 		this.status = status;
 	}
+	public FriendWithStatusDTO() { }
 
 	public FriendDTO getFriend() {
 		return friend;
@@ -22,6 +23,11 @@ public class FriendWithStatusDTO {
 	}
 	public void setStatus(boolean status) {
 		this.status = status;
+	}
+
+	@Override
+	public String toString() {
+		return "FriendWithStatusDTO{friend:"+friend+",status:"+status+"}";
 	}
 
 }

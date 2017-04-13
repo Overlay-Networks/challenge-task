@@ -7,6 +7,7 @@ public class FriendDTO {
 	public FriendDTO(String name) {
 		this.name = name;
 	}
+	public FriendDTO() { }
 
 	public String getName() {
 		return name;
@@ -16,4 +17,8 @@ public class FriendDTO {
 		this.name = name;
 	}
 
+	@Override
+	public String toString() {
+		return "FriendDTO{name:"+name+"}";
+	}
 }

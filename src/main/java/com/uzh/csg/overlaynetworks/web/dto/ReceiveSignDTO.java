@@ -1,13 +1,13 @@
 package com.uzh.csg.overlaynetworks.web.dto;
 
-public class MessageResultDTO {
+public class ReceiveSignDTO {
 
 	private long messageId;
 
-	public MessageResultDTO(long messageId) {
+	public ReceiveSignDTO(long messageId) {
 		this.messageId = messageId;
 	}
-	public MessageResultDTO() { }
+	public ReceiveSignDTO() { }
 
 	public long getMessageId() {
 		return messageId;
@@ -19,7 +19,7 @@ public class MessageResultDTO {
 
 	@Override
 	public String toString() {
-		return "MessageResultDTO{messageId:"+messageId+"}";
+		return "ReceiveSignDTO{messageId:"+messageId+"}";
 	}
 
 }
