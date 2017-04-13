@@ -13,6 +13,10 @@
 
 <body>
 	<div id="app" v-if="!isLoading">
+		<div id="logout" v-if="auth.authenticated" @click="logout">
+			<i class="fa fa-sign-out"></i>
+			<span class="text">Logout</span>
+		</div>
 		<div id="login" v-if="!auth.authenticated">
 			<div class="logo">
 				<div class="image"></div>

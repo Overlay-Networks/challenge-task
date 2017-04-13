@@ -38,6 +38,12 @@ new Vue({
 			var App = this;
 			console.log(App.chat.messageInput);
 			App.chat.messageInput = '';
+		},
+		logout: function() {
+			removeAuthFromStorage();
+			this.auth.authenticated = false;
+			this.auth.username = '';
+			this.auth.friends = [];
 		}
 	},
 	mounted: function() {
