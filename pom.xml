@@ -41,7 +41,11 @@
 			<artifactId>spring-boot-devtools</artifactId>
 			<optional>true</optional>
 		</dependency>
-
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-websocket</artifactId>
+		</dependency>
+		
 		<dependency>
 			<groupId>net.tomp2p</groupId>
 			<artifactId>tomp2p-all</artifactId>
@@ -65,20 +69,61 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 		</dependency>
-		
+
+		<!-- Web3j for JSON RPC to geth -->
 		<dependency>
             <groupId>org.web3j</groupId>
             <artifactId>core</artifactId>
             <version>${version.web3j}</version>
         </dependency>
         
-        <dependency>
+		<dependency>
   			<groupId>org.assertj</groupId>
   			<artifactId>assertj-core</artifactId>
   			<version>${version.assertj}</version>
   			<scope>test</scope>
 		</dependency>
-                
+		
+		<!-- WebJars -->
+		<dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>webjars-locator</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>sockjs-client</artifactId>
+			<version>1.0.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>stomp-websocket</artifactId>
+			<version>2.3.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>bootstrap</artifactId>
+			<version>3.3.7</version>
+		</dependency>
+		<dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>jquery</artifactId>
+			<version>3.1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>font-awesome</artifactId>
+			<version>4.7.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>bootstrap</artifactId>
+			<version>4.0.0-alpha.6-1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.webjars.bower</groupId>
+			<artifactId>tether</artifactId>
+			<version>1.4.0</version>
+		</dependency>
 	</dependencies>
 	
 	<build>
