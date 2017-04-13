@@ -10,6 +10,7 @@ new Vue({
 			friends: []
 		},
 		chat: {
+			messageInput: '',
 			messages: []
 		},
 		login: {
@@ -32,6 +33,11 @@ new Vue({
 				alert("wrong password");
 				App.login.username = '';
 			});
+		},
+		submitMessage: function() {
+			var App = this;
+			console.log(App.chat.messageInput);
+			App.chat.messageInput = '';
 		}
 	},
 	mounted: function() {

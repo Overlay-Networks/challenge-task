@@ -226,6 +226,9 @@ input, textarea {
 	font-size: 18px;
 	cursor: pointer;
 	color: #7fa0d2;
+	background: none;
+	border: 0;
+	padding: 0;
 }
 .submit {
 	position:relative;

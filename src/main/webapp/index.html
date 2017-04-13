@@ -90,10 +90,12 @@
 						<div class="message">Have to go. Bye.</div>
 					</div>
 				</div>
-				<div class="input">
-					<input type="text" placeholder="Write a message">
-					<i class="fa fa-send submit"></i>
-				</div>
+				<form>
+					<div class="input">
+						<input type="text" placeholder="Write a message" v-model="chat.messageInput">
+						<button class="fa fa-send submit" @click.prevent="submitMessage"></button>
+					</div>
+				</form>
 			</div>
 		</div>
 	</div>
