@@ -18,11 +18,13 @@
 				<div class="image"></div>
 				<div class="text">Challenge Task</div>
 			</div>
-			<label>
-				<span>User Name</span>
-				<input type="text" name="username" v-model="login.username">
-			</label>
-			<i class="submit fa fa-send" @click="submitLogin"></i>
+			<form>
+				<label>
+					<span>User Name</span>
+					<input type="text" name="username" v-model="login.username">
+				</label>
+				<button class="submit fa fa-send" @click.prevent="submitLogin"></button>
+			</form>
 		</div>
 		<div id="messenger" v-if="auth.authenticated">
 			<div class="left-column">

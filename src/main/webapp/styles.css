@@ -32,6 +32,9 @@ input, textarea {
 #login .submit {
 	margin-left: -28px;
 	font-size: 90%;
+	background: none;
+	padding: 0;
+	border: 0;
 }
 
 #login,
