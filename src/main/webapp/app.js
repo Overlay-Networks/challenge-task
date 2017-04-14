@@ -137,9 +137,7 @@ new Vue({
 		},
 		logout: function() {
 			removeAuthFromStorage();
-			this.auth.authenticated = false;
-			this.auth.username = '';
-			this.auth.contacts = [];
+			window.location.reload();
 		}
 	},
 	mounted: function() {
