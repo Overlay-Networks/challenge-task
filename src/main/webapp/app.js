@@ -7,34 +7,36 @@ new Vue({
 		auth: {
 			authenticated: false,
 			username: '',
-			friends: []
+			contacts: []
 		},
 		login: {
 			username: ''
 		},
+		contact: {
+			contactInput: '',
+			contactInputDisabled: false
+		},
 		chat: {
 			messageInput: '',
 			messageInputDisabled: false,
-			selectedFriend: '',
-			messages: {
-				'yuri': []
-			}
+			selectedContact: '',
+			messages: { }
 		},
 	},
 	computed: {
 		currentChatMessages: function() {
-			return this.chat.messages[this.chat.selectedFriend];
+			return this.chat.messages[this.chat.selectedContact];
 		}
 	},
 	methods: {
 		submitLogin: function() {
 			var App = this;
 			
-			App.$http.post('/rest/login', { name: App.login.username }).then(function() {
+			return App.$http.post('/rest/login', { name: App.login.username }).then(function() {
 				App.auth = {
 					authenticated: true,
 					username: App.login.username,
-					friends: [],
+					contacts: [],
 				};
 				setAuthToStorage(App.auth);
 				App.login.username = '';
@@ -43,16 +45,77 @@ new Vue({
 				App.login.username = '';
 			});
 		},
+		autoLogin: function(storageObject) {
+			var App = this;
+			
+			return App.$http.post('/rest/login', { name: storageObject.username }).then(function() {
+				App.auth = {
+					authenticated: true,
+					username: storageObject.username,
+					contacts: []
+				};
+				setAuthToStorage(App.auth);
+				
+				var contactSet = [];
+				for(var i=0; i < storageObject.contacts.length; i++) {
+					contactSet.push({
+						name: storageObject.contacts[i]
+					});
+				}
+				
+				return App.$http.post('/rest/new-contact-list', contactSet).then(function() {
+					App.auth.contacts = storageObject.contacts;
+					for(var j=0; j < App.auth.contacts.length; j++) {
+						App.chat.messages[App.auth.contacts[j]] = [];
+					}
+					
+					setAuthToStorage(App.auth);
+				}, function() {
+					App.auth.contacts = [];
+					setAuthToStorage(App.auth);
+				});
+				
+			}, function() {
+				removeAuthFromStorage();
+			});
+		},
+		addContact: function() {
+			var App = this;
+			
+			// user is already in list
+			if(Object.keys(App.chat.messages).indexOf(App.contact.contactInput) !== -1) {
+				return;
+			}
+			
+			App.contact.contactInputDisabled = true;
+			App.$http.post('/rest/new-contact', { name: App.contact.contactInput }).then(function() {
+				
+				App.auth.contacts.push(App.contact.contactInput);
+				setAuthToStorage(App.auth);
+				
+				App.chat.messages[App.contact.contactInput] = [];
+				App.contact.contactInput = '';
+				App.contact.contactInputDisabled = false;
+				
+				// set focus back to input field
+				window.setTimeout(function() {
+					App.$refs.addContactInput.focus();
+				});
+			}, function() {
+				App.contact.contactInputDisabled = false;
+			});
+			
+		},
 		submitMessage: function() {
 			var App = this;
-			var selectedFriend = App.chat.selectedFriend;
+			var selectedContact = App.chat.selectedContact;
 			var messageInput =  App.chat.messageInput
 			
 			App.chat.messageInputDisabled = true;
-			App.$http.post('/rest/send-message', { message: messageInput, receiver: { name: selectedFriend }}).then(function(response) {
+			App.$http.post('/rest/send-message', { message: messageInput, receiver: { name: selectedContact }}).then(function(response) {
 				var messageId = response.body.messageId;
 				
-				App.chat.messages[selectedFriend].push({
+				App.chat.messages[selectedContact].push({
 					messageId: messageId,
 					content: messageInput,
 					isOwnMessage: true,
@@ -76,17 +139,20 @@ new Vue({
 			removeAuthFromStorage();
 			this.auth.authenticated = false;
 			this.auth.username = '';
-			this.auth.friends = [];
+			this.auth.contacts = [];
 		}
 	},
 	mounted: function() {
 		var App = this;
-		var auth = getAuthFromStorage();
-		if(auth && auth.authenticated && auth.username) {
-			// after login call:
-			App.auth.authenticated = true;
-			App.auth.username = auth.username;
-			App.isLoading = false;
+		
+		var storageObject = getAuthFromStorage();
+		if(storageObject && storageObject.authenticated && storageObject.username && storageObject.contacts) {
+			App.autoLogin(storageObject).then(function() {
+				App.isLoading = false;
+			}, function () {
+				removeAuthFromStorage();
+				App.isLoading = false;
+			});
 		} else {
 			removeAuthFromStorage();
 			App.isLoading = false;
@@ -95,12 +161,11 @@ new Vue({
 });
 
 function getAuthFromStorage() {
-	var auth = window.localStorage.getItem(KEY_AUTH);
-	if (auth) {
+	var storageObject = window.localStorage.getItem(KEY_AUTH);
+	if (storageObject) {
 		var result = null;
-		try { result = JSON.parse(auth); } catch (error) { result = null; }
+		try { result = JSON.parse(storageObject); } catch (error) { result = null; }
 		return result;
-		
 	} else {
 		return null;
 	}

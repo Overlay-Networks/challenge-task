@@ -36,50 +36,36 @@
 					<div class="image"></div>
 					<div class="text">Challenge Task</div>
 				</div>
+				<div class="add-contact">
+					<form>
+						<input placeholder="Add contact..." v-model="contact.contactInput" :disabled="contact.contactInputDisabled" ref="addContactInput" autofocus>
+						<button class="submit fa fa-send" @click.prevent="addContact"></button>
+					</form>
+				</div>
 				<div class="contacts">
-					<div class="contact">
+					<div class="contact" v-for="contact in auth.contacts" :class="{'selected': contact === chat.selectedContact}" @click="chat.selectedContact = contact">
 						<div class="user"></div>
-						<div class="name">Peter Griffin</div>
-					</div>
-					<div class="contact selected">
-						<div class="user"></div>
-						<div class="name">Yuri</div>
-					</div>
-					<div class="contact">
-						<div class="user"></div>
-						<div class="name">Sebi</div>
-					</div>
-					<div class="contact">
-						<div class="user"></div>
-						<div class="name">Killer</div>
-					</div>
-					<div class="contact">
-						<div class="user"></div>
-						<div class="name">Tschonny</div>
-					</div>
-					<div class="contact">
-						<div class="user"></div>
-						<div class="name">Bart Simpson</div>
+						<div class="name">{{ contact }}</div>
 					</div>
 				</div>
 			</div>
-			<div class="right-column" v-if="chat.selectedFriend === ''">
+			<div class="right-column" v-if="chat.selectedContact === ''">
 				<div class="start">
 					<div class="zebra"></div>
 					<div class="start-text">
 						<i class="fa fa-info-circle"></i>
-						Please choose an existing friend or add a new one on the left side.
+						Please choose an existing contact or add a new one on the left side.
 					</div>
 				</div>
 			</div>
-			<div class="right-column" v-if="chat.selectedFriend !== ''">
+			<div class="right-column" v-if="chat.selectedContact !== ''">
 				<div class="receiver">
 					<div>
 						<div class="to">
 						<span>To:</span>
 							<div class="contact">
 								<div class="user"></div>
-								<div class="name">{{ chat.selectedFriend }}</div>
+								<div class="name">{{ chat.selectedContact }}</div>
 							</div>
 						</div>
 						<div class="from">

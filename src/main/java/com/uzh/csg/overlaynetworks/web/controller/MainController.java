@@ -4,15 +4,13 @@ import static java.lang.Math.random;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.uzh.csg.overlaynetworks.web.dto.FriendDTO;
-import com.uzh.csg.overlaynetworks.web.dto.FriendWithStatusDTO;
+import com.uzh.csg.overlaynetworks.web.dto.ContactDTO;
 import com.uzh.csg.overlaynetworks.web.dto.LoginDTO;
 import com.uzh.csg.overlaynetworks.web.dto.MessageDTO;
 import com.uzh.csg.overlaynetworks.web.dto.MessageResultDTO;
@@ -27,7 +25,6 @@ public class MainController {
 			method = POST,
 			consumes = APPLICATION_JSON_UTF8_VALUE)
 	public void login(@RequestBody LoginDTO loginDTO) {
-
 		String name = loginDTO.getName();
 
 		if(name == null || "".equals(name)) {
@@ -38,19 +35,21 @@ public class MainController {
 	}
 
 	@RequestMapping(
-			value = "/update-friends",
+			value = "/new-contact-list",
 			method = POST,
 			consumes = APPLICATION_JSON_UTF8_VALUE,
 			produces = APPLICATION_JSON_UTF8_VALUE)
-	public Set<FriendWithStatusDTO> updateFriends(@RequestBody Set<FriendDTO> friends) {
+	public void newContactList(@RequestBody Set<ContactDTO> friends) {
+		// TODO create new contact list
+	}
 
-		// TODO update friend list
-
-		Set<FriendWithStatusDTO> output = new HashSet<>();
-		for(FriendDTO friend : friends) {
-			output.add(new FriendWithStatusDTO(friend, (random() < 0.5)));
-		}
-		return output;
+	@RequestMapping(
+			value = "/new-contact",
+			method = POST,
+			consumes = APPLICATION_JSON_UTF8_VALUE,
+			produces = APPLICATION_JSON_UTF8_VALUE)
+	public void newContact(@RequestBody ContactDTO friend) {
+		// TODO add contact to contact list
 	}
 
 	@RequestMapping(

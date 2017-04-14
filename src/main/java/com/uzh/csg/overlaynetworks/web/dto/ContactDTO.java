@@ -1,13 +1,13 @@
 package com.uzh.csg.overlaynetworks.web.dto;
 
-public class FriendDTO {
+public class ContactDTO {
 
 	private String name;
 
-	public FriendDTO(String name) {
+	public ContactDTO(String name) {
 		this.name = name;
 	}
-	public FriendDTO() { }
+	public ContactDTO() { }
 
 	public String getName() {
 		return name;
@@ -19,6 +19,6 @@ public class FriendDTO {
 
 	@Override
 	public String toString() {
-		return "FriendDTO{name:"+name+"}";
+		return "ContactDTO{name:"+name+"}";
 	}
 }

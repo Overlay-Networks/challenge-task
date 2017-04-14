@@ -2,20 +2,20 @@ package com.uzh.csg.overlaynetworks.web.dto;
 
 public class MessageDTO {
 
-	private FriendDTO receiver;
+	private ContactDTO receiver;
 	private String message;
 
-	public MessageDTO(FriendDTO receiver, String message) {
+	public MessageDTO(ContactDTO receiver, String message) {
 		this.receiver = receiver;
 		this.message = message;
 	}
 	public MessageDTO() { }
 
-	public FriendDTO getReceiver() {
+	public ContactDTO getReceiver() {
 		return receiver;
 	}
 
-	public void setReceiver(FriendDTO receiver) {
+	public void setReceiver(ContactDTO receiver) {
 		this.receiver = receiver;
 	}
 

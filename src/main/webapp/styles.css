@@ -109,10 +109,35 @@ input, textarea {
 	font-size: 20px;
 	margin-top: 10px;
 }
+.add-contact {
+	width: 100%;
+	padding: 0 10px 7px 10px;
+	position: relative;
+	height: 45px;
+}
+.add-contact input {
+	border: 1px solid #ccc;
+	padding: 5px 35px 5px 10px;
+	width: 100%;
+	background: transparent;
+	border-radius: 3px;
+}
+.add-contact input:focus {
+	outline: 0;
+}
+.add-contact .submit {
+	background: transparent;
+	padding: 0;
+	border: 0;
+	position: absolute;
+	top: 10px;
+	right: 18px;
+}
+
 #messenger .contacts {
-	overflow-y: scroll;
+	overflow-y: auto;
 	padding-right: 0;
-	height: calc(90vh - 140px);
+	height: calc(90vh - 140px - 45px);
 }
 #messenger .contacts .contact {
 	background: #fff;
@@ -265,7 +290,7 @@ input, textarea {
 	left: 50%;
 	transition: 0.15s ease border-color, 0.15s ease background-color, 0.15s ease color;
 }
-#messenger .input input:disabled {
+input:disabled {
 	background: #efefef;
 	color: #a5a5a5;
 }
