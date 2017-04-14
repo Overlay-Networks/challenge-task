@@ -146,14 +146,27 @@ input, textarea {
 #messenger .receiver > div {
 	position: absolute;
 	top: 50%;
-	left: 20px;
+	left: 0;
+	width: 100%;
+	padding-left: 25px;
+	padding-right: 25px;
 	transform: translateY(-50%);
 }
-#messenger .receiver .to {
-	margin-right: 20px;
+#messenger .receiver .from,
+#messenger .receiver .from *,
+#messenger .receiver .to,
+#messenger .receiver .to * {
 	display: inline-block;
 	vertical-align: middle;
 }
+#messenger .receiver .from {
+	float: right;
+}
+#messenger .receiver .from .contact,
+#messenger .receiver .to .contact {
+	margin-left: 20px;
+}
+
 #messenger .receiver .contact {
 	display: inline-block;
 	vertical-align: middle;
@@ -208,8 +221,22 @@ input, textarea {
 	display: inline-block;
 	font-size: 14px;
 	box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.2);
-	max-width: 40%;
 	color: #444;
+	max-width: 65%;
+}
+#messenger .message-box .message .approval {
+	color: #43a930;
+	font-size: 10px;
+}
+#messenger .message-box .right .message .approval {
+	float: right;
+	margin-top: 0.6em;
+	margin-left: 0.6em;
+}
+#messenger .message-box .left .message .approval {
+	float: left;
+	margin-top: 0.6em;
+	margin-right: 0.6em;
 }
 #messenger .message-box .message-row.left .message {
 	border-bottom-left-radius: 1px;

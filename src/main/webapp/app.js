@@ -9,12 +9,36 @@ new Vue({
 			username: '',
 			friends: []
 		},
-		chat: {
-			messageInput: '',
-			messages: []
-		},
 		login: {
 			username: ''
+		},
+		chat: {
+			messageInput: '',
+			selectedFriend: 'yuri',
+			messages: {
+				'yuri': [{
+					content: "Hallo",
+					isOwnMessage: true,
+					approved: true
+				}, {
+					content: "What are you doing?",
+					isOwnMessage: true,
+					approved: false
+				}, {
+					content: "Hi",
+					isOwnMessage: false,
+					approved: false
+				}, {
+					content: "I'm working, and you?",
+					isOwnMessage: false,
+					approved: false
+				}]
+			}
+		},
+	},
+	computed: {
+		currentChatMessages: function() {
+			return this.chat.messages[this.chat.selectedFriend];
 		}
 	},
 	methods: {

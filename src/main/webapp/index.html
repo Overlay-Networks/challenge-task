@@ -66,32 +66,33 @@
 			<div class="right-column">
 				<div class="receiver">
 					<div>
-						<div class="to">To:</div>
-						<div class="contact">
-							<div class="user"></div>
-							<div class="name">Yuri</div>
+						<div class="to">
+						<span>To:</span>
+							<div class="contact">
+								<div class="user"></div>
+								<div class="name">{{ chat.selectedFriend }}</div>
+							</div>
+						</div>
+						<div class="from">
+							<span>From:</span>
+							<div class="contact">
+								<div class="user"></div>
+								<div class="name">{{ auth.username }}</div>
+							</div>
 						</div>
 					</div>
 				</div>
 				<div class="message-box">
-					<div class="no-message">
+					<div class="no-message" v-if="currentChatMessages.length === 0">
 						<i class="fa fa-ban"></i>
 						No message has been sent yet.
 					</div>
-					<div class="message-row left">
-						<div class="message">Hi!</div>
-					</div>
-					<div class="message-row left">
-						<div class="message">How are you doing? :)</div>
-					</div>
-					<div class="message-row right">
-						<div class="message">I'm fine, and you?</div>
-					</div>
-					<div class="message-row right">
-						<div class="message">What are you doing?</div>
-					</div>
-					<div class="message-row left">
-						<div class="message">Have to go. Bye.</div>
+					
+					<div class="message-row" v-for="message in currentChatMessages" :class="{ 'left': message.isOwnMessage, 'right': !message.isOwnMessage }">
+						<div class="message">
+							<i class="approval fa fa-check" v-if="message.approved"></i>
+							{{ message.content }}
+						</div>
 					</div>
 				</div>
 				<form>
