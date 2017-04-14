@@ -14,25 +14,10 @@ new Vue({
 		},
 		chat: {
 			messageInput: '',
-			selectedFriend: 'yuri',
+			messageInputDisabled: false,
+			selectedFriend: '',
 			messages: {
-				'yuri': [{
-					content: "Hallo",
-					isOwnMessage: true,
-					approved: true
-				}, {
-					content: "What are you doing?",
-					isOwnMessage: true,
-					approved: false
-				}, {
-					content: "Hi",
-					isOwnMessage: false,
-					approved: false
-				}, {
-					content: "I'm working, and you?",
-					isOwnMessage: false,
-					approved: false
-				}]
+				'yuri': []
 			}
 		},
 	},
@@ -60,8 +45,32 @@ new Vue({
 		},
 		submitMessage: function() {
 			var App = this;
-			console.log(App.chat.messageInput);
-			App.chat.messageInput = '';
+			var selectedFriend = App.chat.selectedFriend;
+			var messageInput =  App.chat.messageInput
+			
+			App.chat.messageInputDisabled = true;
+			App.$http.post('/rest/send-message', { message: messageInput, receiver: { name: selectedFriend }}).then(function(response) {
+				var messageId = response.body.messageId;
+				
+				App.chat.messages[selectedFriend].push({
+					messageId: messageId,
+					content: messageInput,
+					isOwnMessage: true,
+					approved: false
+				});
+				
+				App.chat.messageInput = '';
+				App.chat.messageInputDisabled = false;
+				
+				// set focus back to input field
+				window.setTimeout(function() {
+					App.$refs.messageInput.focus();
+				});
+				
+			}, function() {
+				
+				App.messageInputDisabled = false;
+			});
 		},
 		logout: function() {
 			removeAuthFromStorage();

@@ -63,7 +63,16 @@
 					</div>
 				</div>
 			</div>
-			<div class="right-column">
+			<div class="right-column" v-if="chat.selectedFriend === ''">
+				<div class="start">
+					<div class="zebra"></div>
+					<div class="start-text">
+						<i class="fa fa-info-circle"></i>
+						Please choose an existing friend or add a new one on the left side.
+					</div>
+				</div>
+			</div>
+			<div class="right-column" v-if="chat.selectedFriend !== ''">
 				<div class="receiver">
 					<div>
 						<div class="to">
@@ -88,7 +97,7 @@
 						No message has been sent yet.
 					</div>
 					
-					<div class="message-row" v-for="message in currentChatMessages" :class="{ 'left': message.isOwnMessage, 'right': !message.isOwnMessage }">
+					<div class="message-row" v-for="message in currentChatMessages" :class="{ 'left': !message.isOwnMessage, 'right': message.isOwnMessage }">
 						<div class="message">
 							<i class="approval fa fa-check" v-if="message.approved"></i>
 							{{ message.content }}
@@ -97,7 +106,7 @@
 				</div>
 				<form>
 					<div class="input">
-						<input type="text" placeholder="Write a message" v-model="chat.messageInput">
+						<input type="text" placeholder="Write a message" v-model="chat.messageInput" :disabled="chat.messageInputDisabled" ref="messageInput" autofocus>
 						<button class="fa fa-send submit" @click.prevent="submitMessage"></button>
 					</div>
 				</form>

@@ -87,6 +87,7 @@ input, textarea {
 	display: block;
 	float: left;
 	width: 75%;
+	height: 100%;
 	position: relative;
 	z-index: 1;
 }
@@ -262,7 +263,11 @@ input, textarea {
 	position: absolute;
 	top: 50%;
 	left: 50%;
-	transition: 0.15s ease border-color;
+	transition: 0.15s ease border-color, 0.15s ease background-color, 0.15s ease color;
+}
+#messenger .input input:disabled {
+	background: #efefef;
+	color: #a5a5a5;
 }
 #messenger .input input:focus {
 	border: 2px solid #7fa0d2;
@@ -292,4 +297,41 @@ input, textarea {
 	top: -0.5em;
 	left: -0.45em;
 	cursor: pointer;
+}
+
+.right-column .start {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%,-50%);
+	text-align: center;
+	max-width: 60%;
+}
+.right-column .start .zebra {
+	position: relative;
+	display: inline-block;
+	width: 216px;
+	height: 216px;
+	overflow: hidden;
+	border-radius: 100%;
+	border: 3px solid #4d4d4d;
+}
+.right-column .start .zebra:after {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: 50%;
+	width: 384px;
+	height: 216px;
+	transform: translateX(-50%);
+	background: url('/zebra.gif');
+	filter: grayscale(100%) brightness(135%);
+	background-size: cover;
+}
+.right-column .start .start-text {
+	margin-top: 20px;
+	font-size: 24px;
+	font-weight: 300;
+	width: 100%;
 }
