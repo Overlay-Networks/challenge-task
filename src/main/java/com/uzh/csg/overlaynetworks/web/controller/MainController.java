@@ -63,7 +63,7 @@ public class MainController {
 		// TODO return message id
 		System.out.println("Message: " + message);
 
-		return new MessageResultDTO(Long.valueOf((random() * 100000) + ""));
+		return new MessageResultDTO(Long.valueOf(Math.round(random() * 10000) + ""));
 	}
 
 }
