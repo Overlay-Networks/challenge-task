@@ -49,6 +49,7 @@ public class MainController {
 			consumes = APPLICATION_JSON_UTF8_VALUE,
 			produces = APPLICATION_JSON_UTF8_VALUE)
 	public void newContact(@RequestBody ContactDTO friend) {
+		// TODO check if new contact is not the same as user's username
 		// TODO add contact to contact list
 	}
 
