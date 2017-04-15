@@ -76,7 +76,7 @@ new Vue({
 						App.chat = storageObject.chat;
 						
 					}, function() {
-						removeFromStorage();
+						App.logout();
 					});
 				
 				}, function() {
@@ -152,8 +152,13 @@ new Vue({
 			});
 		},
 		logout: function() {
-			removeFromStorage();
-			window.location.reload();
+			var App = this;
+			App.$http.post('/rest/logout').then(function() {
+				removeFromStorage();
+				window.location.reload();
+			}, function() {
+				window.location.reload();
+			});
 		}
 	},
 	mounted: function() {
