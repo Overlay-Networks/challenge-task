@@ -18,10 +18,6 @@ public class SmartContractExample {
 	Web3j web3 = Web3j.build(new HttpService());
 	String message = "TEST";
 	
-	/*
-	 * At the moment i did not get the Web3 command line interface to run, which is necessary to create
-	 * the Contracts class for some reason. Will be included asap.
-	 */
 	BigInteger gasPrice = new BigInteger("10000");
 	BigInteger gasLimit = new BigInteger("10000000");
 	BigInteger initialValue = new BigInteger("3000000");
