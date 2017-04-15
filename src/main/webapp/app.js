@@ -54,6 +54,7 @@ new Vue({
 			var App = this;
 			var socket = new SockJS('/websocket');
 			App.websockets.stompClient = Stomp.over(socket);
+			App.websockets.stompClient.debug = null;
 			App.websockets.stompClient.connect({}, function connect(frame) {
 				App.websockets.connected = true;
 				App.websockets.initialized = true;
