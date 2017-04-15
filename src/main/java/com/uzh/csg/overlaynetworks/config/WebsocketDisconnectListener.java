@@ -9,7 +9,7 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import com.uzh.csg.overlaynetworks.web.controller.MainRestController;
 
 @Component
-public class WebsocketListener implements ApplicationListener<SessionDisconnectEvent> {
+public class WebsocketDisconnectListener implements ApplicationListener<SessionDisconnectEvent> {
 
 	@Autowired
 	private MainRestController mainRestController;
