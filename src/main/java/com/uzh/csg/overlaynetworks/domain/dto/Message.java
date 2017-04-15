@@ -1,21 +1,21 @@
-package com.uzh.csg.overlaynetworks.web.dto;
+package com.uzh.csg.overlaynetworks.domain.dto;
 
-public class MessageDTO {
+public class Message {
 
-	private ContactDTO receiver;
+	private Contact receiver;
 	private String message;
 
-	public MessageDTO(ContactDTO receiver, String message) {
+	public Message(Contact receiver, String message) {
 		this.receiver = receiver;
 		this.message = message;
 	}
-	public MessageDTO() { }
+	public Message() { }
 
-	public ContactDTO getReceiver() {
+	public Contact getReceiver() {
 		return receiver;
 	}
 
-	public void setReceiver(ContactDTO receiver) {
+	public void setReceiver(Contact receiver) {
 		this.receiver = receiver;
 	}
 

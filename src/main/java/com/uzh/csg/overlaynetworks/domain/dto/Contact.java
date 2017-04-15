@@ -1,13 +1,13 @@
-package com.uzh.csg.overlaynetworks.web.dto;
+package com.uzh.csg.overlaynetworks.domain.dto;
 
-public class ContactDTO {
+public class Contact {
 
 	private String name;
 
-	public ContactDTO(String name) {
+	public Contact(String name) {
 		this.name = name;
 	}
-	public ContactDTO() { }
+	public Contact() { }
 
 	public String getName() {
 		return name;

@@ -1,13 +1,13 @@
-package com.uzh.csg.overlaynetworks.web.dto;
+package com.uzh.csg.overlaynetworks.domain.dto;
 
-public class MessageResultDTO {
+public class MessageResult {
 
 	private long messageId;
 
-	public MessageResultDTO(long messageId) {
+	public MessageResult(long messageId) {
 		this.messageId = messageId;
 	}
-	public MessageResultDTO() { }
+	public MessageResult() { }
 
 	public long getMessageId() {
 		return messageId;

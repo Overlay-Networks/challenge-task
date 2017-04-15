@@ -1,13 +1,13 @@
-package com.uzh.csg.overlaynetworks.web.dto;
+package com.uzh.csg.overlaynetworks.domain.dto;
 
-public class ReceiveSignDTO {
+public class ReceiveNotary {
 
 	private long messageId;
 
-	public ReceiveSignDTO(long messageId) {
+	public ReceiveNotary(long messageId) {
 		this.messageId = messageId;
 	}
-	public ReceiveSignDTO() { }
+	public ReceiveNotary() { }
 
 	public long getMessageId() {
 		return messageId;

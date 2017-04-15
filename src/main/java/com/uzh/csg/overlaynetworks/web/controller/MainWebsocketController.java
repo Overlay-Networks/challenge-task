@@ -1,16 +1,19 @@
 package com.uzh.csg.overlaynetworks.web.controller;
 
+import java.util.Set;
+
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 
-import com.uzh.csg.overlaynetworks.web.dto.ReceiveMessageDTO;
-import com.uzh.csg.overlaynetworks.web.dto.ReceiveSignDTO;
+import com.uzh.csg.overlaynetworks.domain.dto.ContactWithStatus;
+import com.uzh.csg.overlaynetworks.domain.dto.ReceiveMessage;
+import com.uzh.csg.overlaynetworks.domain.dto.ReceiveNotary;
 import com.uzh.csg.overlaynetworks.web.dto.example.Greeting;
 import com.uzh.csg.overlaynetworks.web.dto.example.HelloMessage;
 
 @Controller
-public class MessageController {
+public class MainWebsocketController {
 
 	/* EXAMPLE */
 	@MessageMapping("/hello") // input
@@ -22,13 +25,18 @@ public class MessageController {
 	/* EXAMPLE END */
 
 	@SendTo("/topic/receive-message")
-	public ReceiveMessageDTO receiveMessage(ReceiveMessageDTO message) {
+	public ReceiveMessage receiveMessage(ReceiveMessage message) {
 		return message;
 	}
 
-	@SendTo("/topic/receive-sign")
-	public ReceiveSignDTO receiveSign(ReceiveSignDTO sign) {
-		return sign;
+	@SendTo("/topic/receive-notary")
+	public ReceiveNotary receiveNotary(ReceiveNotary notary) {
+		return notary;
+	}
+
+	@SendTo("/topic/update-contacts")
+	public Set<ContactWithStatus> updateContacts(Set<ContactWithStatus> contactsWithStatus) {
+		return contactsWithStatus;
 	}
 
 }

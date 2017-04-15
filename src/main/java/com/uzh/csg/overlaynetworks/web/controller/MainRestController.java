@@ -1,37 +1,59 @@
 package com.uzh.csg.overlaynetworks.web.controller;
 
-import static java.lang.Math.random;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
+import java.util.HashSet;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.uzh.csg.overlaynetworks.web.dto.ContactDTO;
-import com.uzh.csg.overlaynetworks.web.dto.LoginDTO;
-import com.uzh.csg.overlaynetworks.web.dto.MessageDTO;
-import com.uzh.csg.overlaynetworks.web.dto.MessageResultDTO;
+import com.uzh.csg.overlaynetworks.domain.DataHolder;
+import com.uzh.csg.overlaynetworks.domain.dto.Contact;
+import com.uzh.csg.overlaynetworks.domain.dto.Login;
+import com.uzh.csg.overlaynetworks.domain.dto.Message;
+import com.uzh.csg.overlaynetworks.domain.dto.MessageResult;
+import com.uzh.csg.overlaynetworks.service.P2PService;
 import com.uzh.csg.overlaynetworks.web.exception.InvalidDataProvidedException;
 
 @RestController
 @RequestMapping("/rest")
-public class MainController {
+public class MainRestController {
+
+	@Autowired
+	private DataHolder dataHolder;
+
+	@Autowired
+	private P2PService p2pService;
 
 	@RequestMapping(
 			value = "/login",
 			method = POST,
 			consumes = APPLICATION_JSON_UTF8_VALUE)
-	public void login(@RequestBody LoginDTO loginDTO) {
-		String name = loginDTO.getName();
+	public void login(@RequestBody Login login) {
+		String name = login.getName();
 
 		if(name == null || "".equals(name)) {
 			throw new InvalidDataProvidedException();
 		}
 
-		// TODO login
+		dataHolder.setAuthenticated(true);
+		dataHolder.setUsername(name);
+		dataHolder.setContacts(new HashSet<>());
+	}
+
+	@RequestMapping(
+			value = "/logout",
+			method = POST,
+			consumes = APPLICATION_JSON_UTF8_VALUE)
+	public void logout() {
+
+		dataHolder.setAuthenticated(false);
+		dataHolder.setUsername(null);
+		dataHolder.setContacts(new HashSet<>());
 	}
 
 	@RequestMapping(
@@ -39,8 +61,13 @@ public class MainController {
 			method = POST,
 			consumes = APPLICATION_JSON_UTF8_VALUE,
 			produces = APPLICATION_JSON_UTF8_VALUE)
-	public void newContactList(@RequestBody Set<ContactDTO> friends) {
-		// TODO create new contact list
+	public void newContactList(@RequestBody Set<Contact> contacts) {
+
+		if(dataHolder.isAuthenticated()) {
+			dataHolder.setContacts(contacts);
+		} else {
+			throw new InvalidDataProvidedException();
+		}
 	}
 
 	@RequestMapping(
@@ -48,22 +75,30 @@ public class MainController {
 			method = POST,
 			consumes = APPLICATION_JSON_UTF8_VALUE,
 			produces = APPLICATION_JSON_UTF8_VALUE)
-	public void newContact(@RequestBody ContactDTO friend) {
-		// TODO check if new contact is not the same as user's username
-		// TODO add contact to contact list
+	public void newContact(@RequestBody Contact contact) {
+
+		if(dataHolder.isAuthenticated()) {
+			dataHolder.getContacts().add(contact);
+		} else {
+			throw new InvalidDataProvidedException();
+		}
 	}
 
 	@RequestMapping(
 			value = "/send-message",
 			method = POST,
 			consumes = APPLICATION_JSON_UTF8_VALUE)
-	public MessageResultDTO sendMessage(@RequestBody MessageDTO message) {
+	public MessageResult sendMessage(@RequestBody Message message) {
 
-		// TODO process message
-		// TODO return message id
-		System.out.println("Message: " + message);
+		MessageResult result = new MessageResult();
 
-		return new MessageResultDTO(Long.valueOf(Math.round(random() * 10000) + ""));
+		if(dataHolder.isAuthenticated()) {
+			p2pService.sendMessage(message);
+		} else {
+			throw new InvalidDataProvidedException();
+		}
+
+		return result;
 	}
 
 }

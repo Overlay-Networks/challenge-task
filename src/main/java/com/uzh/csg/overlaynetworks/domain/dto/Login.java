@@ -1,13 +1,13 @@
-package com.uzh.csg.overlaynetworks.web.dto;
+package com.uzh.csg.overlaynetworks.domain.dto;
 
-public class LoginDTO {
+public class Login {
 
 	private String name;
 
-	public LoginDTO(String name) {
+	public Login(String name) {
 		this.name = name;
 	}
-	public LoginDTO() { }
+	public Login() { }
 
 	public String getName() {
 		return name;

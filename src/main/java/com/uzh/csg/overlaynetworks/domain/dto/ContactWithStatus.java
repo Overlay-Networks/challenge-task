@@ -1,20 +1,20 @@
-package com.uzh.csg.overlaynetworks.web.dto;
+package com.uzh.csg.overlaynetworks.domain.dto;
 
-public class ContactWithStatusDTO {
+public class ContactWithStatus {
 
-	private ContactDTO contact;
+	private Contact contact;
 	private boolean status;
 
-	public ContactWithStatusDTO(ContactDTO contact, boolean status) {
+	public ContactWithStatus(Contact contact, boolean status) {
 		this.contact = contact;
 		this.status = status;
 	}
-	public ContactWithStatusDTO() { }
+	public ContactWithStatus() { }
 
-	public ContactDTO getContact() {
+	public Contact getContact() {
 		return contact;
 	}
-	public void setContact(ContactDTO contact) {
+	public void setContact(Contact contact) {
 		this.contact = contact;
 	}
 
