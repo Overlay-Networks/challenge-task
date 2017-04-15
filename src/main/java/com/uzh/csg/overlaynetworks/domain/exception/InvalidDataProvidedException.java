@@ -1,4 +1,4 @@
-package com.uzh.csg.overlaynetworks.web.exception;
+package com.uzh.csg.overlaynetworks.domain.exception;
 
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 

@@ -16,8 +16,8 @@ import com.uzh.csg.overlaynetworks.domain.dto.Contact;
 import com.uzh.csg.overlaynetworks.domain.dto.Login;
 import com.uzh.csg.overlaynetworks.domain.dto.Message;
 import com.uzh.csg.overlaynetworks.domain.dto.MessageResult;
+import com.uzh.csg.overlaynetworks.domain.exception.InvalidDataProvidedException;
 import com.uzh.csg.overlaynetworks.service.P2PService;
-import com.uzh.csg.overlaynetworks.web.exception.InvalidDataProvidedException;
 
 @RestController
 @RequestMapping("/rest")
