@@ -2,6 +2,7 @@ package com.uzh.csg.overlaynetworks.web.controller;
 
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
@@ -14,6 +15,9 @@ import com.uzh.csg.overlaynetworks.web.dto.example.HelloMessage;
 
 @Controller
 public class MainWebsocketController {
+
+	@Autowired
+	private MainRestController mainRestController;
 
 	/* EXAMPLE */
 	@MessageMapping("/hello") // input
@@ -37,6 +41,11 @@ public class MainWebsocketController {
 	@SendTo("/topic/update-contacts")
 	public Set<ContactWithStatus> updateContacts(Set<ContactWithStatus> contactsWithStatus) {
 		return contactsWithStatus;
+	}
+
+	@MessageMapping("/logout")
+	public void logout() {
+		mainRestController.logout();
 	}
 
 }
