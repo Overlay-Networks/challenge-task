@@ -164,6 +164,26 @@ input, textarea {
 #messenger .contact .name {
 	display: inline-block;
 	vertical-align: middle;
+	white-space: nowrap;
+}
+#messenger .contacts .contact .name {
+	width: calc(100% - 2.3em - 1.7em);
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+#messenger .contact .online-status {
+	float: right;
+	font-size: 12px;
+	margin-top: 6px;
+	color: #ca1e1e;
+}
+#messenger .contact .online-status.online {
+	color: #38ca1e;
+}
+#messenger .right-column .contact .online-status {
+	float: none;
+	margin-left: 5px;
+	margin-top: 0;
 }
 
 #messenger .receiver {
@@ -294,8 +314,8 @@ input, textarea {
 	left: 50%;
 }
 input:disabled {
-	background: #efefef;
-	color: #a5a5a5;
+	background: #efefef !important;
+	color: #a5a5a5 !important;
 }
 input {
 	transition: 0.15s ease border-color, 0.15s ease background-color, 0.15s ease color;

@@ -25,7 +25,7 @@
 			<form>
 				<label>
 					<span>User Name</span>
-					<input type="text" name="username" v-model="login.username" autofocus>
+					<input type="text" name="username" v-model="input.loginUsername" :disabled="input.loginUsernameDisabled" autofocus>
 				</label>
 				<button class="submit fa fa-send" @click.prevent="submitLogin"></button>
 			</form>
@@ -38,14 +38,17 @@
 				</div>
 				<div class="add-contact">
 					<form>
-						<input placeholder="Add contact..." v-model="contact.contactInput" :disabled="contact.contactInputDisabled" ref="addContactInput" autofocus>
+						<input placeholder="Add contact..." v-model="input.addContactInput" :disabled="input.addContactInputDisabled" ref="addContactInput" autofocus>
 						<button class="submit fa fa-send" @click.prevent="addContact"></button>
 					</form>
 				</div>
 				<div class="contacts">
-					<div class="contact" v-for="contact in auth.contacts" :class="{'selected': contact === chat.selectedContact}" @click="chat.selectedContact = contact">
+					<div class="contact" v-for="contact in chat.contacts" :class="{'selected': contact.name === chat.selectedContact}" @click="contact.name === chat.selectedContact ? chat.selectedContact = '' : chat.selectedContact = contact.name">
 						<div class="user"></div>
-						<div class="name">{{ contact }}</div>
+						<div class="name">{{ contact.name }}</div>
+						<div class="online-status" :class="{'online':contact.online}">
+							<i class="fa fa-circle"></i>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -65,7 +68,10 @@
 						<span>To:</span>
 							<div class="contact">
 								<div class="user"></div>
-								<div class="name">{{ chat.selectedContact }}</div>
+								<div class="name">
+									{{ chat.selectedContact }}
+									<i class="online-status fa fa-circle" :class="{'online': currentChatContactIsOnline}"></i>
+								</div>
 							</div>
 						</div>
 						<div class="from">
@@ -92,7 +98,7 @@
 				</div>
 				<form>
 					<div class="input">
-						<input type="text" placeholder="Write a message" v-model="chat.messageInput" :disabled="chat.messageInputDisabled" ref="messageInput" autofocus>
+						<input type="text" placeholder="Write a message" v-model="input.messageInput" :disabled="input.messageInputDisabled || !currentChatContactIsOnline" ref="messageInput" autofocus>
 						<button class="fa fa-send submit" @click.prevent="submitMessage"></button>
 					</div>
 				</form>

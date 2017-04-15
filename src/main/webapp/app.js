@@ -1,4 +1,4 @@
-var KEY_AUTH = 'overlay_networks_group1__auth';
+var KEY_AUTH = 'overlay_networks_group1';
 
 new Vue({
 	el: '#app',
@@ -6,124 +6,141 @@ new Vue({
 		isLoading: true,
 		auth: {
 			authenticated: false,
-			username: '',
-			contacts: []
-		},
-		login: {
 			username: ''
 		},
-		contact: {
-			contactInput: '',
-			contactInputDisabled: false
-		},
 		chat: {
-			messageInput: '',
-			messageInputDisabled: false,
+			contacts: [],
 			selectedContact: '',
-			messages: { }
 		},
+		input: {
+			loginUsername: '',
+			loginUsernameDisabled: false,
+			addContactInput: '',
+			addContactInputDisabled: false,
+			messageInput: '',
+			messageInputDisabled: false
+		}
 	},
 	computed: {
 		currentChatMessages: function() {
-			return this.chat.messages[this.chat.selectedContact];
+			var App = this;
+			var contact = App.chat.contacts.filter(function(item) {
+				return item.name === App.chat.selectedContact;
+			});
+			if(contact.length === 1) {
+				return contact[0].messages;
+			} else {
+				return [];
+			}
+		},
+		currentChatContactIsOnline: function() {
+			var App = this;
+			var contact = App.chat.contacts.filter(function(item) {
+				return item.name === App.chat.selectedContact;
+			});
+			if(contact.length === 1) {
+				return !!contact && contact.online;
+			} else {
+				return false;
+			}
 		}
 	},
 	methods: {
 		submitLogin: function() {
 			var App = this;
 			
-			return App.$http.post('/rest/login', { name: App.login.username }).then(function() {
+			App.input.loginUsernameDisabled = true;
+			return App.$http.post('/rest/login', { name: App.input.loginUsername }).then(function() {
 				App.auth = {
 					authenticated: true,
-					username: App.login.username,
-					contacts: [],
+					username: App.input.loginUsername
 				};
-				setAuthToStorage(App.auth);
-				App.login.username = '';
+				setToStorage(App);
+				
+				App.input.loginUsername = '';
 			}, function() {
-				alert("wrong password");
-				App.login.username = '';
+				alert("You cannot use this username.");
+				App.input.loginUsername = '';
+			}).then(function() {
+				App.input.loginUsernameDisabled = false;
 			});
 		},
 		autoLogin: function(storageObject) {
 			var App = this;
 			
-			return App.$http.post('/rest/login', { name: storageObject.username }).then(function() {
-				App.auth = {
-					authenticated: true,
-					username: storageObject.username,
-					contacts: []
-				};
-				setAuthToStorage(App.auth);
-				
-				var contactSet = [];
-				for(var i=0; i < storageObject.contacts.length; i++) {
-					contactSet.push({
-						name: storageObject.contacts[i]
+			if(storageObject && storageObject.auth && storageObject.chat) {
+				return App.$http.post('/rest/login', { name: storageObject.auth.username }).then(function() {
+					var contactSet = getSubmittableContactList(storageObject);
+					return App.$http.post('/rest/new-contact-list', contactSet).then(function() {
+						App.auth = storageObject.auth;
+						App.chat = storageObject.chat;
+						
+					}, function() {
+						removeFromStorage();
 					});
-				}
 				
-				return App.$http.post('/rest/new-contact-list', contactSet).then(function() {
-					App.auth.contacts = storageObject.contacts;
-					for(var j=0; j < App.auth.contacts.length; j++) {
-						App.chat.messages[App.auth.contacts[j]] = [];
-					}
-					
-					setAuthToStorage(App.auth);
 				}, function() {
-					App.auth.contacts = [];
-					setAuthToStorage(App.auth);
+					removeFromStorage();
 				});
 				
-			}, function() {
-				removeAuthFromStorage();
-			});
+			} else {
+				removeFromStorage();
+				return Promise.resolve();
+			}
 		},
 		addContact: function() {
 			var App = this;
 			
-			// user is already in list
-			if(Object.keys(App.chat.messages).indexOf(App.contact.contactInput) !== -1) {
-				return;
-			}
+			var usernameNotEmpty = App.input.addContactInput.trim() !== '';
+			var usernameDifferentToOwnUsername = App.input.addContactInput !== App.auth.username;
+			var userDoesNotExistAlready = App.chat.contacts.filter(function(item) {
+				return item.name === App.input.addContactInput;
+			}).length === 0;
 			
-			App.contact.contactInputDisabled = true;
-			App.$http.post('/rest/new-contact', { name: App.contact.contactInput }).then(function() {
-				
-				App.auth.contacts.push(App.contact.contactInput);
-				setAuthToStorage(App.auth);
-				
-				App.chat.messages[App.contact.contactInput] = [];
-				App.contact.contactInput = '';
-				App.contact.contactInputDisabled = false;
-				
-				// set focus back to input field
-				window.setTimeout(function() {
-					App.$refs.addContactInput.focus();
+			if(usernameNotEmpty && usernameDifferentToOwnUsername && userDoesNotExistAlready) {
+				App.input.addContactInputDisabled = true;
+				App.$http.post('/rest/new-contact', { name: App.input.addContactInput }).then(function() {
+					
+					App.chat.contacts.push({
+						name: App.input.addContactInput,
+						messages: [],
+						online: false
+					});
+					setToStorage(App);
+					
+					App.input.addContactInput = '';
+					App.input.addContactInputDisabled = false;
+					
+					// set focus back to input field
+					window.setTimeout(function() {
+						App.$refs.addContactInput.focus();
+					});
+				}, function() {
+					App.input.addContactInputDisabled = false;
 				});
-			}, function() {
-				App.contact.contactInputDisabled = false;
-			});
+			}
 			
 		},
 		submitMessage: function() {
 			var App = this;
 			var selectedContact = App.chat.selectedContact;
-			var messageInput =  App.chat.messageInput
+			var messageInput =  App.input.messageInput
 			
-			App.chat.messageInputDisabled = true;
+			App.input.messageInputDisabled = true;
 			App.$http.post('/rest/send-message', { message: messageInput, receiver: { name: selectedContact }}).then(function(response) {
 				var messageId = response.body.messageId;
 				
-				App.chat.messages[selectedContact].push({
+				App.chat.contacts.filter(function(item) {
+					return item.name === selectedContact;
+				})[0].messages.push({
 					messageId: messageId,
 					content: messageInput,
 					isOwnMessage: true,
 					approved: false
 				});
 				
-				App.chat.messageInput = '';
-				App.chat.messageInputDisabled = false;
+				App.input.messageInput = '';
+				App.input.messageInputDisabled = false;
 				
 				// set focus back to input field
 				window.setTimeout(function() {
@@ -131,48 +148,65 @@ new Vue({
 				});
 				
 			}, function() {
-				
 				App.messageInputDisabled = false;
 			});
 		},
 		logout: function() {
-			removeAuthFromStorage();
+			removeFromStorage();
 			window.location.reload();
 		}
 	},
 	mounted: function() {
 		var App = this;
 		
-		var storageObject = getAuthFromStorage();
-		if(storageObject && storageObject.authenticated && storageObject.username && storageObject.contacts) {
-			App.autoLogin(storageObject).then(function() {
-				App.isLoading = false;
-			}, function () {
-				removeAuthFromStorage();
-				App.isLoading = false;
-			});
-		} else {
-			removeAuthFromStorage();
+		App.isLoading = true;
+		var storageObject = getFromStorage();
+		App.autoLogin(storageObject).then(function() {
 			App.isLoading = false;
-		}
+		}, function() {
+			App.isLoading = false;
+		});
 	}
 });
 
-function getAuthFromStorage() {
+function getFromStorage() {
 	var storageObject = window.localStorage.getItem(KEY_AUTH);
 	if (storageObject) {
 		var result = null;
 		try { result = JSON.parse(storageObject); } catch (error) { result = null; }
-		return result;
+		
+		// adapt online status & selectedFriend
+		if(result.chat && result.auth) {
+			result.chat.selectedContact = '';
+			for(var i=0; i<result.chat.contacts.length; i++) {
+				result.chat.contacts[i].online = false;
+			}
+			return result;
+		} else {
+			return null;
+		}
 	} else {
 		return null;
 	}
 }
-function setAuthToStorage(auth) {
-	window.localStorage.setItem(KEY_AUTH, JSON.stringify(auth));
+function setToStorage(App) {
+	var storageObject = { auth: App.auth, chat: App.chat };
+	window.localStorage.setItem(KEY_AUTH, JSON.stringify(storageObject));
 }
-function removeAuthFromStorage() {
+function removeFromStorage() {
 	window.localStorage.removeItem(KEY_AUTH);
+}
+
+function getSubmittableContactList(App) {
+	var contactArray = Object.keys(App.chat.contacts);
+	var contactSubmitSet = [];
+	
+	for(var i=0; i < contactArray.length; i++) {
+		contactSubmitSet.push({
+			name: contactArray[i]
+		});
+	}
+	return contactSubmitSet;
 }
 
 /* Sockets: 
