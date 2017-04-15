@@ -16,7 +16,6 @@ import com.uzh.csg.overlaynetworks.domain.dto.ContactWithStatus;
 import com.uzh.csg.overlaynetworks.domain.dto.Message;
 import com.uzh.csg.overlaynetworks.domain.dto.MessageResult;
 import com.uzh.csg.overlaynetworks.domain.dto.ReceiveMessage;
-import com.uzh.csg.overlaynetworks.web.controller.MainWebsocketController;
 
 @Service
 public class P2PService {
@@ -25,16 +24,14 @@ public class P2PService {
 	private DataHolder dataHolder;
 
 	@Autowired
-	private MainWebsocketController socketController;
+	private SimpMessagingTemplate websocket;
 
 	private boolean updateContactIsRunning = false;
-
-	@Autowired
-	private SimpMessagingTemplate websocket;
 
 	/*
 	 * searches the online status for every contact every 5s
 	 * returns a contact list with status.
+	 * result is returned asynchronously via websockets
 	 */
 	@Scheduled(fixedDelay = 5000)
 	public void updateOnlineStatusOfFriends() {
@@ -58,6 +55,7 @@ public class P2PService {
 	/*
 	 * receives message which are directed to this user.
 	 * redirects the message to the socket controller (front-end).
+	 * result is returned asynchronously via websockets
 	 */
 	public void receiveMessage() {
 		// TODO get those messages from a p2p channel
@@ -66,12 +64,13 @@ public class P2PService {
 		message.setMessage("test123");
 		message.setSender(new Contact("sender123"));
 
-		socketController.receiveMessage(message);
+		websocket.convertAndSend("/topic/receive-message", message);
 	}
 
 	/*
 	 * sends messages into the p2p network,
 	 * returns a unique message ID
+	 * result is returned immediately (via REST)
 	 */
 	public MessageResult sendMessage(Message message) {
 		// TODO send message into p2p network

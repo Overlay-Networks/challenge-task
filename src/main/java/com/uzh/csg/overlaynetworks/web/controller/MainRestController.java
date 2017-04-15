@@ -90,10 +90,10 @@ public class MainRestController {
 			consumes = APPLICATION_JSON_UTF8_VALUE)
 	public MessageResult sendMessage(@RequestBody Message message) {
 
-		MessageResult result = new MessageResult();
+		MessageResult result = null;
 
 		if(dataHolder.isAuthenticated()) {
-			p2pService.sendMessage(message);
+			result = p2pService.sendMessage(message);
 		} else {
 			throw new InvalidDataProvidedException();
 		}

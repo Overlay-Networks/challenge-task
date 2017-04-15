@@ -80,6 +80,7 @@ new Vue({
 
 				App.websockets.stompClient.subscribe('/topic/receive-notary', function (response) {
 					response = JSON.parse(response.body);
+					var messageFound = false;
 					
 					for(var i = 0; i < App.chat.contacts.length; i++) {
 						var contact = App.chat.contacts[i];
@@ -89,11 +90,14 @@ new Vue({
 						
 						if(messageArray.length === 1) {
 							messageArray[0].approved = true;
+							messageFound = true;
 							setToStorage(App);
-							
-						} else {
-							console.log("Could not find a message to approve (notary)", response);
+							break;
 						}
+					}
+					
+					if(!messageFound) {
+						console.log("Could not find a message to approve (notary)", response);
 					}
 				});
 				App.websockets.stompClient.subscribe('/topic/update-contacts', function (response) {
