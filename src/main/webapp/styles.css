@@ -387,3 +387,40 @@ input:focus {
 	font-weight: 300;
 	width: 100%;
 }
+
+.websocket-lost {
+	position: absolute;
+	top: -0.5%;
+	left: -0.5%;
+	width: 101%;
+	height: 101%;
+	background: rgba(0,0,0,0.7);
+	z-index: 9999;
+	border-radius: 0.2em;
+	color: white;
+	display: block !important;
+	text-align: center;
+	cursor: pointer;
+}
+.websocket-lost > div {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%,-50%);
+}
+.websocket-lost .text-1 {
+	font-size: 50px;
+	font-weight: 300;
+	text-shadow: 0.05em 0.05em 0.1em rgba(0,0,0,0.5);
+}
+.websocket-lost .fa {
+	font-size: 150px;
+	margin-top: 0.1em;
+	margin-bottom: 0.15em;
+	text-shadow: 0.02em 0.02em 0.07em rgba(0,0,0,0.3);
+}
+.websocket-lost .text-2 {
+	font-size: 30px;
+	font-weight: 300;
+	text-shadow: 0.05em 0.05em 0.1em rgba(0,0,0,0.5);
+}

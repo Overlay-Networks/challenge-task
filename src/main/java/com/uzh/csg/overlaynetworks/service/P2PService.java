@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +29,9 @@ public class P2PService {
 
 	private boolean updateContactIsRunning = false;
 
+	@Autowired
+	private SimpMessagingTemplate websocket;
+
 	/*
 	 * searches the online status for every contact every 5s
 	 * returns a contact list with status.
@@ -35,13 +39,13 @@ public class P2PService {
 	@Scheduled(fixedDelay = 5000)
 	public void updateOnlineStatusOfFriends() {
 		Set<ContactWithStatus> result = new HashSet<>();
-		if(!updateContactIsRunning && dataHolder.isAuthenticated()) {
+		if(!updateContactIsRunning && dataHolder.isAuthenticated() && dataHolder.getContacts().size() > 0) {
 			updateContactIsRunning = true;
 
 			for(Contact contact : dataHolder.getContacts()) {
 				result.add(new ContactWithStatus(contact, getStatusForContact(contact)));
 			}
-			socketController.updateContacts(result);
+			websocket.convertAndSend("/topic/update-contacts", result);
 			updateContactIsRunning = false;
 		}
 	}

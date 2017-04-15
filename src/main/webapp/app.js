@@ -4,6 +4,11 @@ new Vue({
 	el: '#app',
 	data: {
 		isLoading: true,
+		websockets: {
+			stompClient: null,
+			connected: false,
+			initialized: false
+		},
 		auth: {
 			authenticated: false,
 			username: ''
@@ -33,19 +38,85 @@ new Vue({
 				return [];
 			}
 		},
-		currentChatContactIsOnline: function() {
+		currentChatContact: function() {
 			var App = this;
+			
 			var contact = App.chat.contacts.filter(function(item) {
 				return item.name === App.chat.selectedContact;
 			});
 			if(contact.length === 1) {
-				return !!contact && contact.online;
-			} else {
-				return false;
+				return contact[0];
 			}
 		}
 	},
 	methods: {
+		connectToWebsockets: function () {
+			var App = this;
+			var socket = new SockJS('/websocket');
+			App.websockets.stompClient = Stomp.over(socket);
+			App.websockets.stompClient.connect({}, function connect(frame) {
+				App.websockets.connected = true;
+				App.websockets.initialized = true;
+
+				App.websockets.stompClient.subscribe('/topic/receive-message', function (response) {
+					response = JSON.parse(response.body);
+					
+					var filteredContact = App.chat.contacts.filter(function(item) {
+						return item.name === response.sender.name;
+					});
+					if(filteredContact.length === 1) {
+						filteredContact[0].messages.push({
+							messageId: response.messageId,
+							content: response.message,
+							isOwnMessage: false,
+							approved: false
+						});
+						setToStorage(App);
+						
+					} else {
+						console.log("Could not find a contact to that message.", message);
+					}
+				});
+
+				App.websockets.stompClient.subscribe('/topic/receive-notary', function (response) {
+					response = JSON.parse(response.body);
+					
+					for(var i = 0; i < App.chat.contacts.length; i++) {
+						var contact = App.chat.contacts[i];
+						var messageArray = contact.messages.filter(function (item) {
+							return item.messageId === response.messageId;
+						});
+						
+						if(messageArray.length === 1) {
+							messageArray[0].approved = true;
+							setToStorage(App);
+							
+						} else {
+							console.log("Could not find a message to approve (notary)", response);
+						}
+					}
+				});
+				App.websockets.stompClient.subscribe('/topic/update-contacts', function (response) {
+					response = JSON.parse(response.body);
+					
+					for(var i = 0; i < response.length; i++) {
+						var responseItem = response[i];
+						
+						var contactArray = App.chat.contacts.filter(function (item) {
+							return item.name === responseItem.contact.name;
+						});
+						if(contactArray.length === 1) {
+							contactArray[0].online = responseItem.status;
+							
+						} else {
+							console.log("Contact not found in local list", responseItem);
+						}
+					}
+				});
+			}, function disconnect() {
+				App.websockets.connected = false;
+			});
+		},
 		submitLogin: function() {
 			var App = this;
 			
@@ -58,6 +129,8 @@ new Vue({
 				setToStorage(App);
 				
 				App.input.loginUsername = '';
+				App.connectToWebsockets();
+				
 			}, function() {
 				alert("You cannot use this username.");
 				App.input.loginUsername = '';
@@ -74,6 +147,7 @@ new Vue({
 					return App.$http.post('/rest/new-contact-list', contactSet).then(function() {
 						App.auth = storageObject.auth;
 						App.chat = storageObject.chat;
+						App.connectToWebsockets();
 						
 					}, function() {
 						App.logout();
@@ -159,6 +233,9 @@ new Vue({
 			}, function() {
 				window.location.reload();
 			});
+		},
+		reload: function() {
+			window.location.reload();
 		}
 	},
 	mounted: function() {
@@ -203,12 +280,12 @@ function removeFromStorage() {
 }
 
 function getSubmittableContactList(App) {
-	var contactArray = Object.keys(App.chat.contacts);
+	var contactArray = App.chat.contacts;
 	var contactSubmitSet = [];
 	
 	for(var i=0; i < contactArray.length; i++) {
 		contactSubmitSet.push({
-			name: contactArray[i]
+			name: contactArray[i].name
 		});
 	}
 	return contactSubmitSet;

@@ -4,10 +4,12 @@ public class ReceiveMessage {
 
 	private Contact sender;
 	private String message;
+	private long messageId;
 
-	public ReceiveMessage(Contact sender, String message) {
+	public ReceiveMessage(Contact sender, String message, long messageId) {
 		this.sender = sender;
 		this.message = message;
+		this.messageId = messageId;
 	}
 	public ReceiveMessage() { }
 
@@ -27,9 +29,17 @@ public class ReceiveMessage {
 		this.message = message;
 	}
 
+	public long getMessageId() {
+		return messageId;
+	}
+
+	public void setMessageId(long messageId) {
+		this.messageId = messageId;
+	}
+
 	@Override
 	public String toString() {
-		return "ReceiveMessageDTO{sender:"+sender+",message:"+message+",}";
+		return "ReceiveMessageDTO{sender:"+sender+",message:"+message+",messageId:"+messageId+"}";
 	}
 
 }

@@ -28,24 +28,22 @@ public class MainWebsocketController {
 	}
 	/* EXAMPLE END */
 
+	@MessageMapping("/receive-message")
 	@SendTo("/topic/receive-message")
 	public ReceiveMessage receiveMessage(ReceiveMessage message) {
 		return message;
 	}
 
+	@MessageMapping("receive-notary")
 	@SendTo("/topic/receive-notary")
 	public ReceiveNotary receiveNotary(ReceiveNotary notary) {
 		return notary;
 	}
 
+	@MessageMapping("update-contacts")
 	@SendTo("/topic/update-contacts")
 	public Set<ContactWithStatus> updateContacts(Set<ContactWithStatus> contactsWithStatus) {
 		return contactsWithStatus;
-	}
-
-	@MessageMapping("/logout")
-	public void logout() {
-		mainRestController.logout();
 	}
 
 }

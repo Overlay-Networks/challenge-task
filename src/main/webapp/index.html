@@ -27,10 +27,17 @@
 					<span>User Name</span>
 					<input type="text" name="username" v-model="input.loginUsername" :disabled="input.loginUsernameDisabled" autofocus>
 				</label>
-				<button class="submit fa fa-send" @click.prevent="submitLogin"></button>
+				<button class="submit fa fa-send" @click.prevent="submitLogin" :disabled="input.loginUsernameDisabled"></button>
 			</form>
 		</div>
 		<div id="messenger" v-if="auth.authenticated">
+			<div class="websocket-lost" @click="reload" v-if="!websockets.connected && websockets.initialized">
+				<div>
+					<div class="text-1">Connection Lost!</div>
+					<i class="fa fa-refresh"></i>
+					<div class="text-2">Please refresh the page.</div>
+				</div>
+			</div>
 			<div class="left-column">
 				<div class="logo">
 					<div class="image"></div>
@@ -39,7 +46,7 @@
 				<div class="add-contact">
 					<form>
 						<input placeholder="Add contact..." v-model="input.addContactInput" :disabled="input.addContactInputDisabled" ref="addContactInput" autofocus>
-						<button class="submit fa fa-send" @click.prevent="addContact"></button>
+						<button class="submit fa fa-send" @click.prevent="addContact" :disabled="input.addContactInputDisabled"></button>
 					</form>
 				</div>
 				<div class="contacts">
@@ -70,7 +77,7 @@
 								<div class="user"></div>
 								<div class="name">
 									{{ chat.selectedContact }}
-									<i class="online-status fa fa-circle" :class="{'online': currentChatContactIsOnline}"></i>
+									<i class="online-status fa fa-circle" :class="{'online': currentChatContact.online}"></i>
 								</div>
 							</div>
 						</div>
@@ -98,8 +105,8 @@
 				</div>
 				<form>
 					<div class="input">
-						<input type="text" placeholder="Write a message" v-model="input.messageInput" :disabled="input.messageInputDisabled || !currentChatContactIsOnline" ref="messageInput" autofocus>
-						<button class="fa fa-send submit" @click.prevent="submitMessage"></button>
+						<input type="text" placeholder="Write a message" v-model="input.messageInput" :disabled="input.messageInputDisabled || !currentChatContact.online" ref="messageInput" autofocus>
+						<button class="fa fa-send submit" @click.prevent="submitMessage" :disabled="input.messageInputDisabled || !currentChatContact.online"></button>
 					</div>
 				</form>
 			</div>
@@ -107,6 +114,8 @@
 	</div>
 	
 	<script src="/webjars/jquery/3.1.0/jquery.min.js"></script>
+	<script src="/webjars/sockjs-client/sockjs.min.js"></script>
+	<script src="/webjars/stomp-websocket/stomp.min.js"></script>
 	<script src="/webjars/tether/1.4.0/dist/js/tether.min.js"></script>
 	<script src="/webjars/bootstrap/4.0.0-alpha.6-1/js/bootstrap.min.js"></script>
 	<script src="/webjars/vue/2.2.4/dist/vue.js"></script>
