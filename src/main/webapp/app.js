@@ -232,6 +232,8 @@ new Vue({
 		},
 		logout: function() {
 			var App = this;
+			
+			App.isLoading = true;
 			App.$http.post('/rest/logout').then(function() {
 				removeFromStorage();
 				window.location.reload();
