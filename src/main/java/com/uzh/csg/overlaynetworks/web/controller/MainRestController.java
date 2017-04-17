@@ -43,6 +43,8 @@ public class MainRestController {
 		dataHolder.setAuthenticated(true);
 		dataHolder.setUsername(name);
 		dataHolder.setContacts(new HashSet<>());
+
+		p2pService.login();
 	}
 
 	@RequestMapping(
@@ -50,6 +52,8 @@ public class MainRestController {
 			method = POST,
 			consumes = APPLICATION_JSON_UTF8_VALUE)
 	public void logout() {
+
+		p2pService.logout();
 
 		dataHolder.setAuthenticated(false);
 		dataHolder.setUsername(null);

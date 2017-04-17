@@ -82,4 +82,20 @@ public class P2PService {
 
 		return result;
 	}
+
+	/*
+	 * initial call to login the user
+	 */
+	public void login() {
+		// TODO connect to p2p channel and login user
+	}
+
+	/*
+	 * final call to logout
+	 */
+	public void logout() {
+		// TODO logout of p2p network, the user MUST be able to login again
+		// this logout call happens, when the websocket connection abrupts
+		// (e.g. browser window closed)
+	}
 }
