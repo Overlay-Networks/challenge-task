@@ -87,6 +87,7 @@ public class P2PService {
 	 * initial call to login the user
 	 */
 	public void login() {
+		
 		// TODO connect to p2p channel and login user
 	}
 
