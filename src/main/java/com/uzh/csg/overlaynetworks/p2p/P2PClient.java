@@ -2,6 +2,7 @@ package com.uzh.csg.overlaynetworks.p2p;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.ServerSocket;
 import java.nio.ByteBuffer;
 import java.util.Random;
 
@@ -18,28 +19,22 @@ import net.tomp2p.storage.Data;
 
 public class P2PClient {
 
-	private int port;
+	private ServerSocket socket;
 	private PeerDHT peer;
 	private String username;
 	
 	private Random random;
 	
-	public P2PClient(int port, String username) {
-		assert(port > 0 && port < 65536);
-		this.port = port;
+	public P2PClient(String username) throws IOException {
+		socket = new ServerSocket(0);
 		this.username = username;
 		random = new Random(85L);
 	}
 	
-	public void start() {
-		try {
-			Bindings bindings = new Bindings().listenAny();
-			peer = new PeerBuilderDHT(new PeerBuilder(new Number160(random)).bindings(bindings).ports(port).start()).start();
-			System.out.println("Client peer started on port " + port);
-		} catch (IOException ie) {
-			System.err.println("Failed to start bootstrapping peer!");
-			System.err.println(ie.getMessage());
-		}
+	public void start() throws IOException {
+		Bindings bindings = new Bindings().addAddress(socket.getInetAddress());
+		peer = new PeerBuilderDHT(new PeerBuilder(new Number160(random)).bindings(bindings).ports(socket.getLocalPort()).start()).start();
+		System.out.println("Client peer started on IP " + socket.getInetAddress() + " on port " + socket.getLocalPort());
 	}
 	
 	public void boostrap(final InetAddress address, final int port) {
