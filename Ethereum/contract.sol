@@ -1,19 +1,15 @@
 pragma solidity ^0.4.0;
 
 contract Hashing {
-    mapping(bytes32 => uint) public timestamps;
+    mapping(string => string) public timestamps;
     bytes32  hashCurrent;
-    string temp;
+    uint currentTimestamp;
 
-    function hash(string message) returns (bytes32) {
-        hashCurrent = sha3(message,msg.sender);
-        timestamps[hashCurrent] = block.timestamp;
-        return hashCurrent;
+    function hash(string message, string identifier) returns (bytes32) {
+        currentTimestamp = block.timestamp;
+        timestamps[identifier] = message;
     }
-}
-
-contract Mapping {
-    function getTimestamp(bytes32 hash) returns (uint) {
-        return Hashing(<address>).timestamps(hash);
-    }
+    function getMessage(string identifier) returns (string) {
+        return timestamps[identifier];
+    } 
 }
