@@ -14,19 +14,23 @@ import java.math.BigInteger;
 import java.util.concurrent.Future;
 
 public class SmartContractExample {
-	Credentials credentials = CredentialsHelper.getDefaultCredentials();
-	Web3j web3 = Web3j.build(new HttpService());
-	String message = "TEST";
-	
-	BigInteger gasPrice = new BigInteger("10000");
-	BigInteger gasLimit = new BigInteger("10000000");
-	BigInteger initialValue = new BigInteger("3000000");
-	Utf8String myGreeting = new Utf8String("hallo");
 	
 
-	Future<ExampleContract> myContract = ExampleContract.deploy(web3, credentials, gasPrice, gasLimit, initialValue, myGreeting);
 	
+	public static Hashing loadContract() {
+		Credentials credentials = CredentialsHelper.getDefaultCredentials();
+		Web3j web3 = Web3j.build(new HttpService());
+		String message = "TEST";
+		
+		BigInteger gasPrice = new BigInteger("20000000000");
+		BigInteger gasLimit = new BigInteger("200000000000");
+		BigInteger initialValue = new BigInteger("200000000000");
+		
+		
 	
+		Hashing contract = Hashing.load("0x018F6Ad947f6ea3C63C27881B05C9F0BA4F85D0b", web3, credentials, gasPrice, gasLimit);
+		return contract;
+	}
 
 	
 }
