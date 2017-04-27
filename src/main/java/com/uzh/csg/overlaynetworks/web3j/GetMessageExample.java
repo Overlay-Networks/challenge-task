@@ -1,4 +1,4 @@
-package com.uzh.csg.overlaynetworks.web3j;
+/*package com.uzh.csg.overlaynetworks.web3j;
 
 import java.math.BigInteger;
 
@@ -34,3 +34,4 @@ public class GetMessageExample implements Example<String> {
 		return myContract.getMessage(identifier).toString();
 	}
 }
+*/
