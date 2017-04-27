@@ -31,8 +31,8 @@ public class GetSmartContractTest extends AbstractLocalhostTest {
 		Uint256 identifier = new Uint256(bigInt);
 		
 		
-		
 		GetMessageExample gm1 = new GetMessageExample();
-		gm1.run(web3j, credentials, GAS_PRICE, GAS_LIMIT, MAX_GAS_PER_TX);
+		System.out.println(gm1.run(web3j, credentials, GAS_PRICE, GAS_LIMIT, MAX_GAS_PER_TX));
+
 	}
 }
