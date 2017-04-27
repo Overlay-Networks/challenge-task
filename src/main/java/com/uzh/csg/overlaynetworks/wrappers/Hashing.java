@@ -1,4 +1,4 @@
-package com.uzh.csg.overlaynetworks.web3j;
+package com.uzh.csg.overlaynetworks.wrappers;
 
 import java.lang.String;
 import java.math.BigInteger;

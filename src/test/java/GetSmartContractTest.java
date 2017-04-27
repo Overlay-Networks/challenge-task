@@ -1,4 +1,4 @@
-import org.junit.Test;
+/*import org.junit.Test;
 import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.crypto.Credentials;
@@ -30,9 +30,9 @@ public class GetSmartContractTest extends AbstractLocalhostTest {
 		BigInteger bigInt = new BigInteger("1");
 		Uint256 identifier = new Uint256(bigInt);
 		
-		
 		GetMessageExample gm1 = new GetMessageExample();
 		System.out.println(gm1.run(web3j, credentials, GAS_PRICE, GAS_LIMIT, MAX_GAS_PER_TX));
 
 	}
 }
+*/
