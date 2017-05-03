@@ -3,6 +3,7 @@ package com.uzh.csg.overlaynetworks.p2p;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.Random;
 
@@ -12,7 +13,6 @@ import net.tomp2p.dht.PeerBuilderDHT;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.futures.BaseFutureAdapter;
 import net.tomp2p.futures.FutureBootstrap;
-import net.tomp2p.futures.FutureDiscover;
 import net.tomp2p.p2p.PeerBuilder;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.storage.Data;
@@ -25,8 +25,12 @@ public class P2PClient {
 	
 	private Random random;
 	
+	/* bootstrapping server IP and port are fixed constants */
+	private static final String BOOTSTRAP_ADDRESS = "127.0.0.1";
+	private static final int BOOTSTRAP_PORT = 46360;
+	
 	public P2PClient(String username) throws IOException {
-		socket = new ServerSocket(0);
+		socket = new ServerSocket(0, 0, InetAddress.getByName(null));
 		this.username = username;
 		random = new Random(85L);
 	}
@@ -35,38 +39,60 @@ public class P2PClient {
 		Bindings bindings = new Bindings().addAddress(socket.getInetAddress());
 		peer = new PeerBuilderDHT(new PeerBuilder(new Number160(random)).bindings(bindings).ports(socket.getLocalPort()).start()).start();
 		System.out.println("Client peer started on IP " + socket.getInetAddress() + " on port " + socket.getLocalPort());
+		System.out.println("Bootstrapping peer...");
+		bootstrap();
 	}
 	
-	public void boostrap(final InetAddress address, final int port) {
-		FutureDiscover discover = peer.peer().discover().inetAddress(address).ports(port).start();
-		System.out.println("Checking discoverability settings...");
-		discover.addListener(new BaseFutureAdapter<FutureDiscover>(){
+	private void bootstrap() {
+		try {
+			InetAddress bootstrapAddress = InetAddress.getByName(null);
+			FutureBootstrap bootstrap = peer.peer().bootstrap().inetAddress(bootstrapAddress).ports(BOOTSTRAP_PORT).start();
+			bootstrap.addListener(new BaseFutureAdapter<FutureBootstrap>() {
 
-			public void operationComplete(FutureDiscover future) throws Exception {
-				if (future.isSuccess()) {
-					System.out.println("Discoverable by other nodes!");
-					
-					FutureBootstrap bootstrap = peer.peer().bootstrap().inetAddress(address).ports(port).start();
-					bootstrap.addListener(new BaseFutureAdapter<FutureBootstrap>() {
-
-						public void operationComplete(FutureBootstrap future) throws Exception {
-							if (future.isSuccess()) {
-								System.out.println("Successfully bootstrapped to server!");
-								storeUserInformationInDHT(username, address, port);
-							} else {
-								System.err.println("Failed to bootstrap!");
-								System.err.println("Reason is " + future.failedReason());
-							}
-						}
-						
-					});
-				} else {
-					System.err.println("Not discoverable by other nodes! Aborting bootstrap...");
-					System.err.println("Reason is " + future.failedReason());
+				public void operationComplete(FutureBootstrap future) throws Exception {
+					if (future.isSuccess()) {
+						System.out.println("Successfully bootstrapped to server!");
+						storeUserInformationInDHT(username, bootstrapAddress, BOOTSTRAP_PORT);
+					} else {
+						System.err.println("Failed to bootstrap!");
+						System.err.println("Reason is " + future.failedReason());
+					}
 				}
-			}
-			
-		});
+				
+			});
+//			FutureDiscover discover = peer.peer().discover().inetAddress(bootstrapAddress).ports(BOOTSTRAP_PORT).start();
+//			System.out.println("Checking discoverability settings...");
+//			discover.addListener(new BaseFutureAdapter<FutureDiscover>(){
+//
+//				public void operationComplete(FutureDiscover future) throws Exception {
+//					if (future.isSuccess()) {
+//						System.out.println("Discoverable by other nodes!");
+//						
+//						FutureBootstrap bootstrap = peer.peer().bootstrap().inetAddress(bootstrapAddress).ports(BOOTSTRAP_PORT).start();
+//						bootstrap.addListener(new BaseFutureAdapter<FutureBootstrap>() {
+//
+//							public void operationComplete(FutureBootstrap future) throws Exception {
+//								if (future.isSuccess()) {
+//									System.out.println("Successfully bootstrapped to server!");
+//									storeUserInformationInDHT(username, bootstrapAddress, BOOTSTRAP_PORT);
+//								} else {
+//									System.err.println("Failed to bootstrap!");
+//									System.err.println("Reason is " + future.failedReason());
+//								}
+//							}
+//							
+//						});
+//					} else {
+//						System.err.println("Not discoverable by other nodes! Aborting bootstrap...");
+//						System.err.println("Reason is " + future.failedReason());
+//					}
+//				}
+//				
+//			});
+		} catch (UnknownHostException uhe) {
+			System.err.println("Invalid host specified: " + BOOTSTRAP_ADDRESS + "!");
+			return;
+		}
 	}
 	
 	/* upon successful bootstrapping, peer stores it's username, IP address and port in DHT */

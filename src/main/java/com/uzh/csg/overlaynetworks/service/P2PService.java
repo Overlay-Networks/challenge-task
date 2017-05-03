@@ -2,6 +2,7 @@ package com.uzh.csg.overlaynetworks.service;
 
 import static java.lang.Math.random;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -16,6 +17,7 @@ import com.uzh.csg.overlaynetworks.domain.dto.ContactWithStatus;
 import com.uzh.csg.overlaynetworks.domain.dto.Message;
 import com.uzh.csg.overlaynetworks.domain.dto.MessageResult;
 import com.uzh.csg.overlaynetworks.domain.dto.ReceiveMessage;
+import com.uzh.csg.overlaynetworks.p2p.P2PClient;
 
 @Service
 public class P2PService {
@@ -26,6 +28,8 @@ public class P2PService {
 	@Autowired
 	private SimpMessagingTemplate websocket;
 
+	private P2PClient client;
+	
 	private boolean updateContactIsRunning = false;
 
 	/*
@@ -87,8 +91,12 @@ public class P2PService {
 	 * initial call to login the user
 	 */
 	public void login() {
-		
-		// TODO connect to p2p channel and login user
+		try {
+			client = new P2PClient("TestYury");
+			client.start();
+		} catch (IOException ie) {
+			System.err.println("Failed to start P2P client: " + ie.getStackTrace());
+		}
 	}
 
 	/*
