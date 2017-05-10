@@ -10,7 +10,7 @@ public final class MessageRegistryHelper {
     }
 
     /**
-     * Returns a web3j wrapper instance of the singleton blockchain contract 'SSDRegistry'.
+     * Returns a web3j wrapper instance of the singleton blockchain contract 'MessageRegistry'.
      *
      * @param web3j a web3j connection
      * @param ssdRegistryAddress an optional address
