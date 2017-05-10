@@ -24,8 +24,7 @@ public class CanGetValuesTest extends AbstractLocalhostTest{
         final BigInteger myBigInt = new BigInteger("1234");
         final Uint256 myIdentifier = new Uint256(myBigInt);
         final List<Type> message = messageRegistry.getMessage(myIdentifier).get();
-        message.
+        System.out.println(message.size());
         
-        assert asyncResult.getValue();
     }
 }
