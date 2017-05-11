@@ -23,7 +23,8 @@ new Vue({
 			addContactInput: '',
 			addContactInputDisabled: false,
 			messageInput: '',
-			messageInputDisabled: false
+			messageInputDisabled: false,
+			notary: false
 		}
 	},
 	computed: {
@@ -70,6 +71,7 @@ new Vue({
 							messageId: response.messageId,
 							content: response.message,
 							isOwnMessage: false,
+							notary: false,
 							approved: false
 						});
 						setToStorage(App);
@@ -203,10 +205,11 @@ new Vue({
 		submitMessage: function() {
 			var App = this;
 			var selectedContact = App.chat.selectedContact;
-			var messageInput =  App.input.messageInput
+			var messageInput =  App.input.messageInput;
+			var notary = App.input.notary;
 			
 			App.input.messageInputDisabled = true;
-			App.$http.post('/rest/send-message', { message: messageInput, receiver: { name: selectedContact }}).then(function(response) {
+			App.$http.post('/rest/send-message', { message: messageInput, receiver: { name: selectedContact }, notary: notary }).then(function(response) {
 				var messageId = response.body.messageId;
 				
 				App.chat.contacts.filter(function(item) {
@@ -215,11 +218,13 @@ new Vue({
 					messageId: messageId,
 					content: messageInput,
 					isOwnMessage: true,
+					notary: notary,
 					approved: false
 				});
 				
 				App.input.messageInput = '';
 				App.input.messageInputDisabled = false;
+				App.input.notary = false;
 				
 				// set focus back to input field
 				window.setTimeout(function() {
@@ -229,6 +234,11 @@ new Vue({
 			}, function() {
 				App.messageInputDisabled = false;
 			});
+		},
+		switchNotaryOfCurrentMessage: function() {
+			if (!this.input.messageInputDisabled && this.currentChatContact.online) {
+				this.input.notary = !this.input.notary;
+			}
 		},
 		logout: function() {
 			var App = this;
@@ -297,59 +307,3 @@ function getSubmittableContactList(App) {
 	}
 	return contactSubmitSet;
 }
-
-/* Sockets: 
- * 
- * 
-var stompClient = null;
-
-function setConnected(connected) {
-	$("#connect").prop("disabled", connected);
-	$("#disconnect").prop("disabled", !connected);
-	if (connected) {
-		$("#conversation").show();
-	}
-	else {
-		$("#conversation").hide();
-	}
-	$("#greetings").html("");
-}
-
-function connect() {
-	var socket = new SockJS('/websocket-connection');
-	stompClient = Stomp.over(socket);
-	stompClient.connect({}, function (frame) {
-		setConnected(true);
-		console.log('Connected: ' + frame);
-		stompClient.subscribe('/topic/greetings', function (greeting) {
-			showGreeting(JSON.parse(greeting.body).content);
-		});
-	});
-}
-
-function disconnect() {
-	if (stompClient != null) {
-		stompClient.disconnect();
-	}
-	setConnected(false);
-	console.log("Disconnected");
-}
-
-function sendName() {
-	stompClient.send("/app/hello", {}, JSON.stringify({'name': $("#name").val()}));
-}
-
-function showGreeting(message) {
-	$("#greetings").append("<tr><td>" + message + "</td></tr>");
-}
-
-$(function () {
-	$("form").on('submit', function (e) {
-		e.preventDefault();
-	});
-	$( "#connect" ).click(function() { connect(); });
-	$( "#disconnect" ).click(function() { disconnect(); });
-	$( "#send" ).click(function() { sendName(); });
-});
-
-*/

@@ -4,10 +4,12 @@ public class Message {
 
 	private Contact receiver;
 	private String message;
+	private boolean notary;
 
-	public Message(Contact receiver, String message) {
+	public Message(Contact receiver, String message, boolean notary) {
 		this.receiver = receiver;
 		this.message = message;
+		this.notary = notary;
 	}
 	public Message() { }
 
@@ -27,9 +29,17 @@ public class Message {
 		this.message = message;
 	}
 
+	public boolean getNotary() {
+		return notary;
+	}
+
+	public void setNotary(boolean notary) {
+		this.notary = notary;
+	}
+
 	@Override
 	public String toString() {
-		return "MessageDTO{receiver:"+receiver+",message:"+message+",}";
+		return "MessageDTO{receiver:"+receiver+",message:"+message+",notary:"+notary+"}";
 	}
 
 }

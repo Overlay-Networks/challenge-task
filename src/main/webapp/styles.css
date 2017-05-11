@@ -278,6 +278,9 @@ input, textarea {
 	color: #43a930;
 	font-size: 10px;
 }
+#messenger .message-box .message .approval.not-yet {
+	color: #dedede;
+}
 #messenger .message-box .right .message .approval {
 	float: right;
 	margin-top: 0.6em;
@@ -301,17 +304,62 @@ input, textarea {
 	position: relative;
 	border-top: 1px solid #b6b6b6;
 }
+#messenger .input .notary-checkbox {
+	border: 1px solid #888;
+	border-radius: 3px;
+	display: block;
+	position: absolute;
+	left: 23px;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 20px;
+	height: 20px;
+	margin-top: -6px;
+	background: white;
+	cursor: pointer;
+}
+#messenger .input .notary-checkbox.disabled {
+	cursor: not-allowed;
+	background: #efefef !important;
+	border-color: #aeaeae;
+}
+#messenger .input .notary-checkbox:after {
+	content: "NOTARY";
+	position: absolute;
+	bottom: -17px;
+	left: 50%;
+	transform: translateX(-50%);
+	letter-spacing: -.5px;
+	font-size: 10px;
+	font-weight: 700;
+	color: #676767;
+}
+#messenger .input .notary-checkbox .fa {
+	visibility: hidden;
+	opacity: 0;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%,-50%);
+	color: #4c4c4c;
+	font-size: 14px;
+}
+#messenger .input .notary-checkbox.checked .fa {
+	visibility: visible;
+	opacity: 1;
+}
 #messenger .input input {
 	background: white;
 	border: 2px solid #e0e0e0;
 	border-radius: 0.6em;
-	width: calc(100% - 20px);
+	width: calc(100% - 20px - 54px);
 	outline: none;
 	padding: 9px 12px;
 	transform: translate(-50%, -50%);
 	position: absolute;
 	top: 50%;
 	left: 50%;
+	margin-left: 27px;
 }
 input:disabled {
 	background: #efefef !important;
