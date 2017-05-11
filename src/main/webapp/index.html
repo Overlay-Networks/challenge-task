@@ -98,13 +98,17 @@
 					
 					<div class="message-row" v-for="message in currentChatMessages" :class="{ 'left': !message.isOwnMessage, 'right': message.isOwnMessage }">
 						<div class="message">
-							<i class="approval fa fa-check" v-if="message.approved"></i>
+							<i class="approval not-yet fa fa-check" v-if="message.notary && !message.approved"></i>
+							<i class="approval fa fa-check" v-if="message.notary && message.approved"></i>
 							{{ message.content }}
 						</div>
 					</div>
 				</div>
 				<form>
 					<div class="input">
+						<div class="notary-checkbox" @click="switchNotaryOfCurrentMessage" :class="{'disabled': input.messageInputDisabled || !currentChatContact.online, 'checked': input.notary }">
+							<i class="fa fa-check"></i>
+						</div>
 						<input type="text" placeholder="Write a message" v-model="input.messageInput" :disabled="input.messageInputDisabled || !currentChatContact.online" ref="messageInput" autofocus>
 						<button class="fa fa-send submit" @click.prevent="submitMessage" :disabled="input.messageInputDisabled || !currentChatContact.online"></button>
 					</div>
