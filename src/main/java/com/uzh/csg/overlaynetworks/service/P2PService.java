@@ -2,7 +2,6 @@ package com.uzh.csg.overlaynetworks.service;
 
 import static java.lang.Math.random;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -18,9 +17,12 @@ import com.uzh.csg.overlaynetworks.domain.dto.Message;
 import com.uzh.csg.overlaynetworks.domain.dto.MessageResult;
 import com.uzh.csg.overlaynetworks.domain.dto.ReceiveMessage;
 import com.uzh.csg.overlaynetworks.p2p.P2PClient;
+import com.uzh.csg.overlaynetworks.p2p.P2PClientDelegate;
+import com.uzh.csg.overlaynetworks.p2p.PeerInfo;
+import com.uzh.csg.overlaynetworks.p2p.error.P2PError;
 
 @Service
-public class P2PService {
+public class P2PService implements P2PClientDelegate {
 
 	@Autowired
 	private DataHolder dataHolder;
@@ -91,12 +93,9 @@ public class P2PService {
 	 * initial call to login the user
 	 */
 	public void login() {
-		try {
-			client = new P2PClient("TestYury");
-			client.start();
-		} catch (IOException ie) {
-			System.err.println("Failed to start P2P client: " + ie.getStackTrace());
-		}
+		client = new P2PClient("TestYury");
+		client.delegate = this;
+		client.start();
 	}
 
 	/*
@@ -107,4 +106,49 @@ public class P2PService {
 		// this logout call happens, when the websocket connection abrupts
 		// (e.g. browser window closed)
 	}
+	
+	/* P2PClientDelegate */
+	
+	@Override
+	public void didLogin(PeerInfo peer, P2PError error) {
+		if (error != null) {
+			String errorMessage = error.getErrorMessage();
+			// TODO handle error
+		} else if (peer != null) {
+			// TODO successful login
+		}
+	}
+	
+	@Override
+	public void didSendMessage(P2PError error) {
+		if (error != null) {
+			String errorMessage = error.getErrorMessage();
+			// TODO handle error
+		} else {
+			// TODO message has been sent
+		}
+	}
+	
+	@Override
+	public void didReceiveMessage(String senderUsername, String message, P2PError error) {
+		if (senderUsername != null && message != null) {
+			// TODO handle message received successfully
+		} else if (error != null) {
+			String errorMessage = error.getErrorMessage();
+			// TODO handle error
+		}
+	}
+	
+	@Override
+	public void didDiscoverContact(Contact contact, P2PError error) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public void didShutdown(P2PError error) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
