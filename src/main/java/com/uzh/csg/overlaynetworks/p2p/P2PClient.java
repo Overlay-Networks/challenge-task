@@ -9,6 +9,7 @@ import java.util.Random;
 import com.uzh.csg.overlaynetworks.p2p.error.P2PLoginError;
 import com.uzh.csg.overlaynetworks.p2p.error.P2PReceiveMessageError;
 import com.uzh.csg.overlaynetworks.p2p.error.P2PSendMessageError;
+import com.uzh.csg.overlaynetworks.p2p.error.P2PShutdownError;
 
 import net.tomp2p.connection.Bindings;
 import net.tomp2p.dht.FutureGet;
@@ -204,13 +205,23 @@ public class P2PClient {
 							if(future.isSuccess()) {
 								System.out.println("Successfully shutted down peer!");
 							} else {
-								System.err.println("Error shutting down peer! Reason is " + future.failedReason());
+								System.err.println("Error shutting down peer!");
+								System.err.println("Reason is " + future.failedReason());
+								
+								if (delegate != null) {
+									delegate.didShutdown(P2PShutdownError.SHUTDOWN_ERROR);
+								}
 							}
 						}
 						
 					});
 				} else {
 					System.err.println("Failed to remove peer credentials from DHT!");
+					System.err.println("Reasom is " + future.failedReason());
+					
+					if (delegate != null) {
+						delegate.didShutdown(P2PShutdownError.CLEAR_DHT_ERROR);
+					}
 				}
 			}
 			

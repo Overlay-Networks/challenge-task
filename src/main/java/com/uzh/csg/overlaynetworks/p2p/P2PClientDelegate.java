@@ -41,8 +41,10 @@ public interface P2PClientDelegate {
 	public void didDiscoverContact(Contact contact, P2PError error);
 	
 	/**
-	 * 
-	 * @param error
+	 * Called when peer has been successfully shutted down or when error during shutdown occured.
+	 * If @error = null, shutdown has been successful.
+	 * If @error != null, there was error during shutdown. Detailed information can be received by calling @error.getErrorMessage()
+	 * @param error - contains information about the error such as error message
 	 */
 	public void didShutdown(P2PError error);
 	

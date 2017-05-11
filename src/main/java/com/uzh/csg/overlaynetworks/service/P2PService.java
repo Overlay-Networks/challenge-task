@@ -147,8 +147,12 @@ public class P2PService implements P2PClientDelegate {
 	
 	@Override
 	public void didShutdown(P2PError error) {
-		// TODO Auto-generated method stub
-		
+		if (error == null) {
+			//TODO successfull shutdown
+		} else {
+			String errorMessage = error.getErrorMessage();
+			// TODO handle error
+		}
 	}
 
 }
