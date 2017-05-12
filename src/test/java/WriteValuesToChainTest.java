@@ -21,7 +21,7 @@ import com.uzh.csg.overlaynetworks.wrappers.MessageRegistry;
 public class WriteValuesToChainTest extends AbstractLocalhostTest{
 
     @Test
-    public void shouldReturnTrueIfValueIsDeployed() throws InterruptedException, ExecutionException {
+    public void shouldReturnTrueIfWrittenToBlockchain() throws InterruptedException, ExecutionException {
         final String contractAddress = run(new IsContractDeployedExample());
         final MessageRegistry messageRegistry = MessageRegistryHelper.getMessageRegistry(getWeb3j(), contractAddress); 
         final BigInteger myBigInt = new BigInteger("1250"); 
