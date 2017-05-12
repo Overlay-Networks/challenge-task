@@ -23,21 +23,12 @@ public class IsContractDeployedExampleTest extends AbstractLocalhostTest{
     @Test
     public void shouldReturnTrueIfContractIsDeployed() throws InterruptedException, ExecutionException {
     	
-    	try{    		
-    		
     	final String contractAddress = run(new IsContractDeployedExample());
         final MessageRegistry messageRegistry = MessageRegistryHelper.getMessageRegistry(getWeb3j(), contractAddress); 
+        final Bool result = messageRegistry.isDeployed().get();
         
-        final Future<Bool> asyncResult = messageRegistry.isDeployed();
-        final boolean isDeployed = AsyncHelper.waitForResult(asyncResult).getValue();
-        
-
-		LOGGER.log(Level.INFO, this.getClass().toString()+"[messageRegistry.isDeployed="+isDeployed+"]");
-        assertThat(isDeployed).isTrue();
-        
-    	} catch(Exception e){
-    		LOGGER.log(Level.INFO, e.toString()+"["+e.getClass().toString()+"]");
-    	}
-
+		LOGGER.log(Level.INFO, this.getClass().toString()+"[messageRegistry.isDeployed="+result.getValue()+"]");
+        assertThat(result.getValue()).isTrue();
+    
     }
 }
