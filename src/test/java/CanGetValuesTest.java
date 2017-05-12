@@ -29,20 +29,20 @@ private static final Logger LOGGER = Logger.getLogger(CanGetValuesTest.class.get
         final String contractAddress = run(new IsContractDeployedExample());
         final MessageRegistry messageRegistry = MessageRegistryHelper.getMessageRegistry(getWeb3j(), contractAddress);  
         
-		LOGGER.log(Level.INFO, "[INFO]"+this.getClass().toString()+"[messageRegistry.getContractAddress()="+messageRegistry.getContractAddress()+"]");
+		LOGGER.log(Level.INFO,this.getClass().toString()+"[messageRegistry.getContractAddress()="+messageRegistry.getContractAddress()+"]");
 
     	final BigInteger myBigInt = new BigInteger("1234");
         final Uint256 myIdentifier = new Uint256(myBigInt);
         
         final List<Type> message = messageRegistry.getMessage(myIdentifier).get();
         
-		LOGGER.log(Level.INFO, "[INFO]"+this.getClass().toString()+"[MESSAGE.size()="+message.size()+"]");
+		LOGGER.log(Level.INFO,this.getClass().toString()+"[MESSAGE.size()="+message.size()+"]");
 		
         assertThat(message).isNotNull();
     	assertThat(message.toString()).isEqualTo("test");
     	
     	} catch(Exception e){
-    		LOGGER.log(Level.INFO, "[INFO]["+e.toString()+"]["+e.getClass().toString()+"]");
+    		LOGGER.log(Level.INFO, e.toString()+"["+e.getClass().toString()+"]");
     	}
     	
   

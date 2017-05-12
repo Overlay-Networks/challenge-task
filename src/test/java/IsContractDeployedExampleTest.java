@@ -8,6 +8,9 @@ import java.util.logging.Logger;
 import org.junit.Test;
 import org.web3j.abi.datatypes.Bool;
 
+import com.hshnordbank.ssd.wrapper.SSDRegistry;
+import com.hshnordbank.web3j.SSDRegistryHelper;
+import com.hshnordbank.web3j.example.DeploymentExample;
 import com.uzh.csg.overlaynetworks.web3j.AsyncHelper;
 import com.uzh.csg.overlaynetworks.web3j.IsContractDeployedExample;
 import com.uzh.csg.overlaynetworks.web3j.MessageRegistryHelper;
@@ -20,16 +23,20 @@ public class IsContractDeployedExampleTest extends AbstractLocalhostTest{
     @Test
     public void shouldReturnTrueIfContractIsDeployed() throws InterruptedException, ExecutionException {
     	
-    	try{
+    	try{    		
+    		
     	final String contractAddress = run(new IsContractDeployedExample());
         final MessageRegistry messageRegistry = MessageRegistryHelper.getMessageRegistry(getWeb3j(), contractAddress); 
-        final Bool asyncResult = messageRegistry.isDeployed().get();
         
-		LOGGER.log(Level.INFO, "[INFO]"+this.getClass().toString()+"[messageRegistry.isDeployed="+asyncResult.getValue().toString()+"]");
-        assertThat(asyncResult.getValue()).isTrue();
+        final Future<Bool> asyncResult = messageRegistry.isDeployed();
+        final boolean isDeployed = AsyncHelper.waitForResult(asyncResult).getValue();
+        
+
+		LOGGER.log(Level.INFO, this.getClass().toString()+"[messageRegistry.isDeployed="+isDeployed+"]");
+        assertThat(isDeployed).isTrue();
         
     	} catch(Exception e){
-    		LOGGER.log(Level.INFO, "[INFO]["+e.toString()+"]["+e.getClass().toString()+"]");
+    		LOGGER.log(Level.INFO, e.toString()+"["+e.getClass().toString()+"]");
     	}
 
     }
