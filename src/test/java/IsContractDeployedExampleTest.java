@@ -8,9 +8,6 @@ import java.util.logging.Logger;
 import org.junit.Test;
 import org.web3j.abi.datatypes.Bool;
 
-import com.hshnordbank.ssd.wrapper.SSDRegistry;
-import com.hshnordbank.web3j.SSDRegistryHelper;
-import com.hshnordbank.web3j.example.DeploymentExample;
 import com.uzh.csg.overlaynetworks.web3j.AsyncHelper;
 import com.uzh.csg.overlaynetworks.web3j.IsContractDeployedExample;
 import com.uzh.csg.overlaynetworks.web3j.MessageRegistryHelper;
@@ -18,7 +15,7 @@ import com.uzh.csg.overlaynetworks.wrappers.MessageRegistry;
 
 public class IsContractDeployedExampleTest extends AbstractLocalhostTest{
 	
-	private static final Logger LOGGER = Logger.getLogger(CanGetValuesTest.class.getName() );
+	private static final Logger LOGGER = Logger.getLogger(IsContractDeployedExampleTest.class.getName() );
 
     @Test
     public void shouldReturnTrueIfContractIsDeployed() throws InterruptedException, ExecutionException {
