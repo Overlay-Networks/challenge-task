@@ -226,6 +226,8 @@ new Vue({
 				App.input.messageInputDisabled = false;
 				App.input.notary = false;
 				
+				setToStorage(App);
+				
 				// set focus back to input field
 				window.setTimeout(function() {
 					App.$refs.messageInput.focus();
