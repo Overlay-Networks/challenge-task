@@ -1,6 +1,8 @@
 package com.uzh.csg.overlaynetworks.p2p;
 
 import com.uzh.csg.overlaynetworks.domain.dto.Contact;
+import com.uzh.csg.overlaynetworks.domain.exception.LoginFailedException;
+import com.uzh.csg.overlaynetworks.domain.exception.MessageSendFailureException;
 import com.uzh.csg.overlaynetworks.p2p.error.P2PError;
 
 public interface P2PClientDelegate {
@@ -8,12 +10,13 @@ public interface P2PClientDelegate {
 	/**
 	 * Called upon successful login or if there was an error when attempting to log in.
 	 * If @error = null, login was successful and information about peer can be extracted from @peer
-	 * If @peer = null, login was unsuccessful. Error information can be extracted by @error.getErrorMessage() 
+	 * If @peer = null, login was unsuccessful. Error information can be extracted by @error.getErrorMessage().
+	 * Also throws LoginFailedException if login wasn't successful.
 	 * @param peer - contains information about peer such as username, IP address and port
 	 * @param error - contains information about the error such as error message
 	 */
-	public void didLogin(PeerInfo peer, P2PError error);
-	
+	public void didLogin(PeerInfo peer, P2PError error) throws LoginFailedException;
+
 	/**
 	 * Called when message has been successfully received by the peer or there was error during receival.
 	 * If @error = null, message has been successfully received, @senderUsername and @message can be read.
@@ -24,22 +27,22 @@ public interface P2PClientDelegate {
 	 * @param error - contains information about the error such as error message
 	 */
 	public void didReceiveMessage(String senderUsername, String message, P2PError error);
-	
+
 	/**
 	 * Called once message has been successfully sent or if there was an error during the sending.
 	 * If @error = null, message has been successfully sent.
-	 * Otherwise, extract error information from P2PError object
+	 * Otherwise, throw MessageSendFailureException and extract error information from P2PError object.
 	 * @param error - contains information about the error such as error message
 	 */
-	public void didSendMessage(P2PError error);
-	
+	public void didSendMessage(P2PError error) throws MessageSendFailureException;
+
 	/**
-	 * 
+	 *
 	 * @param contact
 	 * @param error
 	 */
 	public void didDiscoverContact(Contact contact, P2PError error);
-	
+
 	/**
 	 * Called when peer has been successfully shutted down or when error during shutdown occured.
 	 * If @error = null, shutdown has been successful.
@@ -47,5 +50,5 @@ public interface P2PClientDelegate {
 	 * @param error - contains information about the error such as error message
 	 */
 	public void didShutdown(P2PError error);
-	
+
 }

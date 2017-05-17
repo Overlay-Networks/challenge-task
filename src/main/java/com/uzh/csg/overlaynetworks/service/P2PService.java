@@ -4,7 +4,11 @@ import static java.lang.Math.random;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import com.uzh.csg.overlaynetworks.domain.exception.MessageSendFailureException;
+import com.uzh.csg.overlaynetworks.domain.exception.LoginFailedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -31,8 +35,10 @@ public class P2PService implements P2PClientDelegate {
 	private SimpMessagingTemplate websocket;
 
 	private P2PClient client;
-	
+
 	private boolean updateContactIsRunning = false;
+
+	private static final Logger LOGGER = Logger.getLogger(P2PService.class.getName() );
 
 	/*
 	 * searches the online status for every contact every 5s
@@ -59,30 +65,12 @@ public class P2PService implements P2PClientDelegate {
 	}
 
 	/*
-	 * receives message which are directed to this user.
-	 * redirects the message to the socket controller (front-end).
-	 * result is returned asynchronously via websockets
-	 */
-	public void receiveMessage() {
-		// TODO get those messages from a p2p channel
-
-		ReceiveMessage message = new ReceiveMessage();
-		message.setMessage("test123");
-		message.setSender(new Contact("sender123"));
-
-		websocket.convertAndSend("/topic/receive-message", message);
-	}
-
-	/*
 	 * sends messages into the p2p network,
 	 * returns a unique message ID
 	 * result is returned immediately (via REST)
 	 */
 	public MessageResult sendMessage(Message message) {
-		// TODO send message into p2p network
-		// TODO return a unique message ID
-
-		System.out.println(message);
+		client.sendMessage(message.getReceiver().getName(), message.getMessage());
 		MessageResult result = new MessageResult();
 		result.setMessageId(Long.valueOf(Math.round(random() * 10000) + ""));
 
@@ -102,56 +90,59 @@ public class P2PService implements P2PClientDelegate {
 	 * final call to logout
 	 */
 	public void logout() {
-		// TODO logout of p2p network, the user MUST be able to login again
-		// this logout call happens, when the websocket connection abrupts
-		// (e.g. browser window closed)
+		client.shutdown();
 	}
-	
+
 	/* P2PClientDelegate */
-	
+
 	@Override
-	public void didLogin(PeerInfo peer, P2PError error) {
+	public void didLogin(PeerInfo peer, P2PError error) throws LoginFailedException {
 		if (error != null) {
 			String errorMessage = error.getErrorMessage();
-			// TODO handle error
-		} else if (peer != null) {
-			// TODO successful login
+			LOGGER.log(Level.INFO, "Failed to login: " + errorMessage);
+			throw new LoginFailedException();
 		}
 	}
-	
+
 	@Override
-	public void didSendMessage(P2PError error) {
+	public void didSendMessage(P2PError error) throws MessageSendFailureException {
 		if (error != null) {
 			String errorMessage = error.getErrorMessage();
-			// TODO handle error
-		} else {
-			// TODO message has been sent
+			LOGGER.log(Level.INFO, "Failed sending message: " + errorMessage);
+			throw new MessageSendFailureException();
 		}
 	}
-	
+
+	/*
+ 	* receives message which are directed to this user.
+ 	* redirects the message to the socket controller (front-end).
+ 	* result is returned asynchronously via websockets
+ 	*/
 	@Override
 	public void didReceiveMessage(String senderUsername, String message, P2PError error) {
 		if (senderUsername != null && message != null) {
-			// TODO handle message received successfully
+			ReceiveMessage receiveMessage = new ReceiveMessage();
+			receiveMessage.setMessage(message);
+			receiveMessage.setSender(new Contact(senderUsername));
+			websocket.convertAndSend("/topic/receive-message", receiveMessage);
 		} else if (error != null) {
 			String errorMessage = error.getErrorMessage();
-			// TODO handle error
+			LOGGER.log(Level.INFO, "Error receiving message: " + errorMessage);
 		}
 	}
-	
+
 	@Override
 	public void didDiscoverContact(Contact contact, P2PError error) {
 		// TODO Auto-generated method stub
-		
 	}
-	
+
 	@Override
 	public void didShutdown(P2PError error) {
 		if (error == null) {
-			//TODO successfull shutdown
+			LOGGER.log(Level.INFO, "Successfully shutdown the client!z");
 		} else {
 			String errorMessage = error.getErrorMessage();
-			// TODO handle error
+			LOGGER.log(Level.INFO, "Error shutting down the client: " + errorMessage);
 		}
 	}
 
