@@ -41,6 +41,11 @@ public final class CredentialsHelper {
         }
     }
 
+    public static String getPublicKey() {
+    	Credentials myCredentials = getDefaultCredentials();
+    	return myCredentials.getAddress();
+    }
+    
     private static File getWalletFile(String user) {
         return new File(WALLET_DIR + (WALLET_DIR.endsWith(File.separator) ? "" : File.separator) + user);
     }

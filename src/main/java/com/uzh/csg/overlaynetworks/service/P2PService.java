@@ -4,6 +4,7 @@ import static java.lang.Math.random;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,6 +21,7 @@ import com.uzh.csg.overlaynetworks.p2p.P2PClient;
 import com.uzh.csg.overlaynetworks.p2p.P2PClientDelegate;
 import com.uzh.csg.overlaynetworks.p2p.PeerInfo;
 import com.uzh.csg.overlaynetworks.p2p.error.P2PError;
+import com.uzh.csg.overlaynetworks.web3j.MessageService;
 
 @Service
 public class P2PService implements P2PClientDelegate {
@@ -65,10 +67,13 @@ public class P2PService implements P2PClientDelegate {
 	 * returns a unique message ID
 	 * result is returned immediately (via REST)
 	 */
-	public MessageResult sendMessage(Message message) {
+	public MessageResult sendMessage(Message message) throws InterruptedException, ExecutionException {
+		MessageService messageService = new MessageService();
 		client.sendMessage(message.getReceiver().getName(), message.getMessage());
 		MessageResult result = new MessageResult();
-
+		if (message.getNotary()) {
+			messageService.writeToBlockchain(message, result.getMessageId());
+		}
 		return result;
 	}
 
