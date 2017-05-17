@@ -106,7 +106,7 @@ public class P2PClient {
 		}
 	}
 
-	public void sendMessage(String username, String message) {
+	public void sendMessage(String username, String message, long messageID) {
 		Number160 storeKey = new Number160(username.hashCode());
 		FutureGet getIPAddress = peer.get(storeKey).start();
 

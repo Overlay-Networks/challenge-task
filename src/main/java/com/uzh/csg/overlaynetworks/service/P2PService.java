@@ -68,7 +68,6 @@ public class P2PService implements P2PClientDelegate {
 	public MessageResult sendMessage(Message message) {
 		client.sendMessage(message.getReceiver().getName(), message.getMessage());
 		MessageResult result = new MessageResult();
-		result.setMessageId(Long.valueOf(Math.round(random() * 10000) + ""));
 
 		return result;
 	}

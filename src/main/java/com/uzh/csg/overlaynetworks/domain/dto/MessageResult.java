@@ -1,5 +1,8 @@
 package com.uzh.csg.overlaynetworks.domain.dto;
 
+
+import java.util.UUID;
+
 public class MessageResult {
 
 	private long messageId;
@@ -7,14 +10,13 @@ public class MessageResult {
 	public MessageResult(long messageId) {
 		this.messageId = messageId;
 	}
-	public MessageResult() { }
+
+	public MessageResult() {
+		this.messageId = UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE;
+	}
 
 	public long getMessageId() {
 		return messageId;
-	}
-
-	public void setMessageId(long messageId) {
-		this.messageId = messageId;
 	}
 
 	@Override
