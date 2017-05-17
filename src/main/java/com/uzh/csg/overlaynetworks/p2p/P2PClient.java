@@ -6,6 +6,7 @@ import java.net.ServerSocket;
 import java.net.UnknownHostException;
 import java.util.Random;
 
+import com.uzh.csg.overlaynetworks.domain.exception.LoginFailedException;
 import com.uzh.csg.overlaynetworks.p2p.error.P2PLoginError;
 import com.uzh.csg.overlaynetworks.p2p.error.P2PReceiveMessageError;
 import com.uzh.csg.overlaynetworks.p2p.error.P2PSendMessageError;
@@ -29,39 +30,39 @@ import net.tomp2p.rpc.ObjectDataReply;
 import net.tomp2p.storage.Data;
 
 public class P2PClient {
-	
+
 	/* to receive events declared in P2PDelegate, implement P2PClientDelegate protocol and set yourself to this property */
 	public P2PClientDelegate delegate;
 
 	private PeerDHT peer;
 	private PeerInfo peerInfo;
-	
+
 	private Random random;
-	
+
 	/* bootstrapping server IP and port are fixed constants */
 	private static final String BOOTSTRAP_ADDRESS = "127.0.0.1";
 	private static final int BOOTSTRAP_PORT = 50704;
-	
+
 	public P2PClient(String username) {
 		this.peerInfo = new PeerInfo(username);
 		random = new Random(85L);
 	}
-	
-	public void start() {
+
+	public void start() throws LoginFailedException {
 		try {
 			ServerSocket socket = new ServerSocket(0, 0, InetAddress.getByName(null));
 			InetAddress address = socket.getInetAddress();
 			int port = socket.getLocalPort();
-			
+
 			/* ServerSocket opened just to get free port */
 			socket.close();
-			
+
 			Bindings bindings = new Bindings().addAddress(address);
 			peer = new PeerBuilderDHT(new PeerBuilder(new Number160(random)).bindings(bindings).ports(port).start()).start();
-			
+
 			/* Specifies what to do when message is received */
 			peer.peer().objectDataReply(new ObjectDataReply() {
-				
+
 				@Override
 				public Object reply(PeerAddress sender, Object request) throws Exception {
 					if (request instanceof String) {
@@ -70,7 +71,7 @@ public class P2PClient {
 						if (separatorIndex >= 0) {
 							String username = payload.substring(0, separatorIndex);
 							String message = payload.substring(separatorIndex+1, payload.length());
-							
+
 							if (delegate != null) {
 								  delegate.didReceiveMessage(username, message, null);
 							}
@@ -86,33 +87,33 @@ public class P2PClient {
 					}
 					return null;
 				}
-				
+
 			});
-			
+
 			peerInfo.setInetAddress(address);
 			peerInfo.setPort(port);
 			peerInfo.setPeerAddress(peer.peerAddress());
-			
+
 			System.out.println("Client peer started on IP " + address + " on port " + port);
 			System.out.println("Bootstrapping peer...");
 			bootstrap();
 		} catch (IOException ie) {
 			ie.printStackTrace();
-			
+
 			if (delegate != null) {
 				delegate.didLogin(null, P2PLoginError.SOCKET_OPEN_ERROR);
 			}
 		}
 	}
-	
+
 	public void sendMessage(String username, String message) {
 		Number160 storeKey = new Number160(username.hashCode());
 		FutureGet getIPAddress = peer.get(storeKey).start();
-		
+
 		String messageWithUsername = username + "_" + message;
-		
+
 		getIPAddress.addListener(new BaseFutureAdapter<FutureGet>() {
-			
+
 			public void operationComplete(FutureGet future) throws Exception {
 				if (future.isSuccess() && future.data() != null) {
 					try {
@@ -124,24 +125,24 @@ public class P2PClient {
 							public void operationComplete(FutureDirect future) throws Exception {
 								if (future.isSuccess()) {
 									System.out.println("Successfuly sent direct message!");
-									
+
 									if (delegate != null) {
 										delegate.didSendMessage(null);
 									}
 								} else {
 									System.err.println("Failed to directly send value!");
 									System.err.println("Reason is: " + future.failedReason());
-									
+
 									if (delegate != null) {
 										delegate.didSendMessage(P2PSendMessageError.SEND_FAILURE);
 									}
 								}
 							}
-							
+
 						});
 					} catch (IllegalArgumentException iae) {
 						iae.printStackTrace();
-						
+
 						if (delegate != null) {
 							delegate.didSendMessage(P2PSendMessageError.INVALID_MESSAGE_FORMAT);
 						}
@@ -149,16 +150,16 @@ public class P2PClient {
 				} else {
 					System.err.println("Failed to retrieve data from DHT for key " + username + "!");
 					System.err.println("Reason is " + future.failedReason());
-					
+
 					if (delegate != null) {
 						delegate.didSendMessage(P2PSendMessageError.USER_NOT_FOUND);
 					}
 				}
 			}
-			
+
 		});
 	}
-	
+
 	public void isOnline(String username) {
 		Number160 userKey = new Number160(username.hashCode());
 		FutureGet retrieveUser = peer.get(userKey).start();
@@ -174,20 +175,20 @@ public class P2PClient {
 						@Override
 						public void operationComplete(FutureDiscover future) throws Exception {
 							if(future.isDiscoveredTCP()) {
-								
+
 							}
-							
+
 						}
-						
+
 					});
 				} else {
 					/* return not online */
 				}
 			}
-			
+
 		});
 	}
-	
+
 	public void shutdown() {
 		FutureRemove removeData = peer.remove(peerInfo.getUsernameKey()).start();
 		removeData.addListener(new BaseFutureAdapter<FutureRemove>() {
@@ -207,30 +208,30 @@ public class P2PClient {
 							} else {
 								System.err.println("Error shutting down peer!");
 								System.err.println("Reason is " + future.failedReason());
-								
+
 								if (delegate != null) {
 									delegate.didShutdown(P2PShutdownError.SHUTDOWN_ERROR);
 								}
 							}
 						}
-						
+
 					});
 				} else {
 					System.err.println("Failed to remove peer credentials from DHT!");
 					System.err.println("Reasom is " + future.failedReason());
-					
+
 					if (delegate != null) {
 						delegate.didShutdown(P2PShutdownError.CLEAR_DHT_ERROR);
 					}
 				}
 			}
-			
+
 		});
 	}
-	
+
 	/* Helper methods */
-	
-	private void bootstrap() {
+
+	private void bootstrap() throws LoginFailedException {
 		try {
 			InetAddress bootstrapAddress = InetAddress.getByName(BOOTSTRAP_ADDRESS);
 			FutureBootstrap bootstrap = peer.peer().bootstrap().inetAddress(bootstrapAddress).ports(BOOTSTRAP_PORT).start();
@@ -249,7 +250,7 @@ public class P2PClient {
 						return;
 					}
 				}
-				
+
 			});
 		} catch (UnknownHostException uhe) {
 			System.err.println("Invalid host specified: " + BOOTSTRAP_ADDRESS + "!");
@@ -259,7 +260,7 @@ public class P2PClient {
 			return;
 		}
 	}
-	
+
 	/* upon successful bootstrapping, peer stores it's username, peer address, IP address and port in DHT */
 	private void storeUserInformationInDHT() {
 		byte[] peerData = peerInfo.toByteArray();
@@ -281,8 +282,8 @@ public class P2PClient {
 					}
 				}
 			}
-			
+
 		});
 	}
-	
+
 }

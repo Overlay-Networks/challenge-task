@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.uzh.csg.overlaynetworks.domain.dto.*;
 import com.uzh.csg.overlaynetworks.domain.exception.MessageSendFailureException;
 import com.uzh.csg.overlaynetworks.domain.exception.LoginFailedException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,11 +16,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.uzh.csg.overlaynetworks.domain.DataHolder;
-import com.uzh.csg.overlaynetworks.domain.dto.Contact;
-import com.uzh.csg.overlaynetworks.domain.dto.ContactWithStatus;
-import com.uzh.csg.overlaynetworks.domain.dto.Message;
-import com.uzh.csg.overlaynetworks.domain.dto.MessageResult;
-import com.uzh.csg.overlaynetworks.domain.dto.ReceiveMessage;
 import com.uzh.csg.overlaynetworks.p2p.P2PClient;
 import com.uzh.csg.overlaynetworks.p2p.P2PClientDelegate;
 import com.uzh.csg.overlaynetworks.p2p.PeerInfo;
@@ -80,7 +76,7 @@ public class P2PService implements P2PClientDelegate {
 	/*
 	 * initial call to login the user
 	 */
-	public void login() {
+	public void login() throws LoginFailedException {
 		client = new P2PClient("TestYury");
 		client.delegate = this;
 		client.start();

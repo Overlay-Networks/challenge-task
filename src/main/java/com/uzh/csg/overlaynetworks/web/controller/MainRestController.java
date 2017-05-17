@@ -6,6 +6,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.uzh.csg.overlaynetworks.domain.exception.LoginFailedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,7 +34,7 @@ public class MainRestController {
 			value = "/login",
 			method = POST,
 			consumes = APPLICATION_JSON_UTF8_VALUE)
-	public void login(@RequestBody Login login) {
+	public void login(@RequestBody Login login) throws LoginFailedException {
 		String name = login.getName();
 
 		if(name == null || "".equals(name)) {
