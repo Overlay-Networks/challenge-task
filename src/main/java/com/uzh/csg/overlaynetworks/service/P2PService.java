@@ -69,8 +69,8 @@ public class P2PService implements P2PClientDelegate {
 	 */
 	public MessageResult sendMessage(Message message) throws InterruptedException, ExecutionException {
 		MessageService messageService = new MessageService();
-		client.sendMessage(message.getReceiver().getName(), message.getMessage());
 		MessageResult result = new MessageResult();
+		client.sendMessage(message.getReceiver().getName(), message.getMessage(), result.getMessageId());
 		if (message.getNotary()) {
 			messageService.writeToBlockchain(message, result.getMessageId());
 		}
