@@ -5,6 +5,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import com.uzh.csg.overlaynetworks.domain.exception.LoginFailedException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,7 +94,7 @@ public class MainRestController {
 			value = "/send-message",
 			method = POST,
 			consumes = APPLICATION_JSON_UTF8_VALUE)
-	public MessageResult sendMessage(@RequestBody Message message) {
+	public MessageResult sendMessage(@RequestBody Message message) throws InterruptedException, ExecutionException {
 
 		MessageResult result = null;
 

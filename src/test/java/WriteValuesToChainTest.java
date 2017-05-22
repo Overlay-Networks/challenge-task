@@ -33,7 +33,7 @@ public class WriteValuesToChainTest extends AbstractLocalhostTest{
         final MessageRegistry messageRegistry = MessageRegistryHelper.getMessageRegistry(getWeb3j(), contractAddress); 
         
         // Write to Blockchain
-        final BigInteger myBigInt = new BigInteger("1250"); 
+        final BigInteger myBigInt = new BigInteger("1251"); 
         final Uint256 identifier = new Uint256(myBigInt);
         final Utf8String message = new Utf8String("This is the Java Test");
         final Address receiver = new Address("0x5BbB245A661C4C112AA0e848A2BB007Ba3e9B628");
