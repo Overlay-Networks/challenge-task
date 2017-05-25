@@ -50,15 +50,16 @@ public class P2PService implements P2PClientDelegate {
 			updateContactIsRunning = true;
 
 			for(Contact contact : dataHolder.getContacts()) {
+				getStatusForContact(contact);
 				result.add(new ContactWithStatus(contact, getStatusForContact(contact)));
 			}
 			websocket.convertAndSend("/topic/update-contacts", result);
 			updateContactIsRunning = false;
 		}
 	}
-	private boolean getStatusForContact(Contact contact) {
-		// TODO get status from contact via P2P network
 
+	private boolean getStatusForContact(Contact contact) {
+		client.updateOnlineStatus(contact);
 		return random() < 0.5;
 	}
 
@@ -70,7 +71,7 @@ public class P2PService implements P2PClientDelegate {
 	public MessageResult sendMessage(Message message) throws InterruptedException, ExecutionException {
 		MessageService messageService = new MessageService();
 		MessageResult result = new MessageResult();
-		client.sendMessage(message.getReceiver().getName(), message.getMessage(), result.getMessageId());
+		client.sendMessage(message, result);
 		if (message.getNotary()) {
 			messageService.writeToBlockchain(message, result.getMessageId());
 		}
@@ -81,7 +82,7 @@ public class P2PService implements P2PClientDelegate {
 	 * initial call to login the user
 	 */
 	public void login() throws LoginFailedException {
-		client = new P2PClient("TestYury");
+		client = new P2PClient(dataHolder.getUsername());
 		client.delegate = this;
 		client.start();
 	}
@@ -119,11 +120,11 @@ public class P2PService implements P2PClientDelegate {
  	* result is returned asynchronously via websockets
  	*/
 	@Override
-	public void didReceiveMessage(String senderUsername, String message, P2PError error) {
-		if (senderUsername != null && message != null) {
+	public void didReceiveMessage(Message message, Contact from, MessageResult result, P2PError error) {
+		if (message != null && result != null) {
 			ReceiveMessage receiveMessage = new ReceiveMessage();
-			receiveMessage.setMessage(message);
-			receiveMessage.setSender(new Contact(senderUsername));
+			receiveMessage.setMessage(message.getMessage());
+			receiveMessage.setSender(from);
 			websocket.convertAndSend("/topic/receive-message", receiveMessage);
 		} else if (error != null) {
 			String errorMessage = error.getErrorMessage();
@@ -132,8 +133,23 @@ public class P2PService implements P2PClientDelegate {
 	}
 
 	@Override
-	public void didDiscoverContact(Contact contact, P2PError error) {
-		// TODO Auto-generated method stub
+	public void didReceiveAck(MessageResult result, P2PError error) {
+		if(result != null) {
+			/* TODO: message was delivered */
+		} else if (error != null) {
+			String errorMessage = error.getErrorMessage();
+			LOGGER.log(Level.INFO, "Error receiving ACK message: " + errorMessage);
+		}
+	}
+
+	@Override
+	public void didUpdateOnlineStatus(Contact contact, boolean isOnline, P2PError error) {
+		if(contact != null) {
+			/* TODO  react on contact online status update */
+		} else if (error != null) {
+			String errorMessage = error.getErrorMessage();
+			LOGGER.log(Level.INFO, "Error receiving ACK message: " + errorMessage);
+		}
 	}
 
 	@Override

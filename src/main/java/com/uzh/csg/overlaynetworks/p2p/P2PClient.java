@@ -5,12 +5,14 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.UnknownHostException;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import com.uzh.csg.overlaynetworks.domain.exception.LoginFailedException;
-import com.uzh.csg.overlaynetworks.p2p.error.P2PLoginError;
-import com.uzh.csg.overlaynetworks.p2p.error.P2PReceiveMessageError;
-import com.uzh.csg.overlaynetworks.p2p.error.P2PSendMessageError;
-import com.uzh.csg.overlaynetworks.p2p.error.P2PShutdownError;
+import com.uzh.csg.overlaynetworks.p2p.error.*;
+import com.uzh.csg.overlaynetworks.domain.dto.Message;
+import com.uzh.csg.overlaynetworks.domain.dto.MessageResult;
+import com.uzh.csg.overlaynetworks.domain.dto.Contact;
 
 import net.tomp2p.connection.Bindings;
 import net.tomp2p.dht.FutureGet;
@@ -18,11 +20,7 @@ import net.tomp2p.dht.FuturePut;
 import net.tomp2p.dht.FutureRemove;
 import net.tomp2p.dht.PeerBuilderDHT;
 import net.tomp2p.dht.PeerDHT;
-import net.tomp2p.futures.BaseFutureAdapter;
-import net.tomp2p.futures.FutureBootstrap;
-import net.tomp2p.futures.FutureDirect;
-import net.tomp2p.futures.FutureDiscover;
-import net.tomp2p.futures.FutureDone;
+import net.tomp2p.futures.*;
 import net.tomp2p.p2p.PeerBuilder;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
@@ -39,9 +37,45 @@ public class P2PClient {
 
 	private Random random;
 
+	private Timer userDataUploadTimer;
+
 	/* bootstrapping server IP and port are fixed constants */
 	private static final String BOOTSTRAP_ADDRESS = "127.0.0.1";
 	private static final int BOOTSTRAP_PORT = 50704;
+
+	/* TTL for peer credentials */
+	private static final int USER_DATA_TTL = 60;
+
+	/* Private class that is response for pushing user data to the DHT */
+	private class UploadUserDataTask extends TimerTask {
+
+		@Override
+		public void run() {
+			byte[] peerData = peerInfo.toByteArray();
+			Data dataToStore = new Data(peerData);
+			dataToStore.ttlSeconds(USER_DATA_TTL);
+			FuturePut put = peer.put(peerInfo.getUsernameKey()).data(dataToStore).start();
+			put.addListener(new BaseFutureAdapter<FuturePut>() {
+
+				@Override
+				public void operationComplete(FuturePut future) throws Exception {
+					if (future.isSuccess()) {
+						System.out.println("Successfully stored user credentials in DHT!");
+						if (delegate != null) {
+							delegate.didLogin(peerInfo, null);
+						}
+					} else {
+						System.err.println("Failed to store user credentials in DHT! Reason is " + future.failedReason());
+						if (delegate != null) {
+							delegate.didLogin(null, P2PLoginError.DHT_STORE_ERROR);
+						}
+					}
+				}
+
+			});
+		}
+
+	}
 
 	public P2PClient(String username) {
 		this.peerInfo = new PeerInfo(username);
@@ -67,22 +101,91 @@ public class P2PClient {
 				public Object reply(PeerAddress sender, Object request) throws Exception {
 					if (request instanceof String) {
 						String payload = (String) request;
-						int separatorIndex = payload.indexOf("_");
-						if (separatorIndex >= 0) {
-							String username = payload.substring(0, separatorIndex);
-							String message = payload.substring(separatorIndex+1, payload.length());
+						int IDandUsernameSeparatorIndex = payload.indexOf("_");
+						int UsernameAndMessageSeparatorIndex = payload.lastIndexOf("_");
+						if (IDandUsernameSeparatorIndex > 0 && UsernameAndMessageSeparatorIndex > 0 && IDandUsernameSeparatorIndex != UsernameAndMessageSeparatorIndex) {
+							try {
+								String messageIDStr = payload.substring(0, IDandUsernameSeparatorIndex);
+								long messageID = Long.parseLong(messageIDStr);
+								String username = payload.substring(IDandUsernameSeparatorIndex+1, UsernameAndMessageSeparatorIndex);
+								String message = payload.substring(UsernameAndMessageSeparatorIndex+1, payload.length());
 
-							if (delegate != null) {
-								  delegate.didReceiveMessage(username, message, null);
+								Message messageObj = new Message();
+								messageObj.setMessage(message);
+								Contact contact = new Contact(username);
+								MessageResult result = new MessageResult(messageID);
+
+								FutureDirect ackMessage = peer.peer().sendDirect(sender).object("ack_" + messageID).start();
+								ackMessage.addListener(new BaseFutureAdapter<FutureDirect>() {
+
+									@Override
+									public void operationComplete(FutureDirect future) throws Exception {
+										if (future.isSuccess()) {
+											System.out.println("Successfully acknowledged incoming message!");
+										} else {
+											System.err.println("Failed to acknoweldge for incoming message!");
+											System.err.println("Reason is: " + future.failedReason());
+										}
+									}
+
+								});
+
+								if (delegate != null) {
+									delegate.didReceiveMessage(messageObj, contact, result, null);
+								}
+							} catch (NumberFormatException nfe) {
+								System.err.println("Failed casting message ID to long!");
+								nfe.printStackTrace();
+
+								if (delegate != null) {
+									delegate.didReceiveMessage(null, null, null, P2PReceiveMessageError.INVALID_MESSAGE_FORMAT);
+								}
 							}
-						} else {
+						} else if (payload.startsWith("ack") && payload.indexOf("_") > 0) {
+							try {
+								String messageIDStr = payload.substring(payload.indexOf("_")+1, payload.length());
+								long messageID = Long.parseLong(messageIDStr);
+								MessageResult result = new MessageResult(messageID);
+								if (delegate != null) {
+									delegate.didReceiveAck(result, null);
+								}
+							} catch (NumberFormatException nfe) {
+								System.err.println("Failed casting message ID to long!");
+								nfe.printStackTrace();
+
+								if (delegate != null) {
+									delegate.didReceiveAck(null, P2PReceiveMessageError.INVALID_MESSAGE_FORMAT);
+								}
+							}
+						} else if(payload.compareTo("ping") == 0) {
+							FutureDirect pingACKMessage = peer.peer().sendDirect(sender).object("pingACK_" + peerInfo.getUsername()).start();
+							pingACKMessage.addListener(new BaseFutureAdapter<FutureDirect>() {
+
+								@Override
+								public void operationComplete(FutureDirect future) throws Exception {
+									if(future.isFailed()) {
+										System.err.println("Failed to send ping ACK!");
+										System.err.println("Reason is: " + future.failedReason());
+									}
+								}
+
+							});
+						} else if(payload.startsWith("pingACK_")) {
+							String username = payload.substring(payload.indexOf("_") + 1, payload.length());
+							Contact contact = new Contact(username);
 							if (delegate != null) {
-								delegate.didReceiveMessage(null, null, P2PReceiveMessageError.INVALID_MESSAGE_FORMAT);
+								delegate.didUpdateOnlineStatus(contact, true, null);
+							}
+						}
+
+						else {
+							if (delegate != null) {
+								delegate.didReceiveMessage(null, null, null, P2PReceiveMessageError.INVALID_MESSAGE_FORMAT);
 							}
 						}
 					} else {
 						if (delegate != null) {
-							  delegate.didReceiveMessage(null, null, P2PReceiveMessageError.INVALID_MESSAGE_FORMAT);
+							  delegate.didReceiveMessage(null, null, null, P2PReceiveMessageError.INVALID_MESSAGE_FORMAT);
 						}
 					}
 					return null;
@@ -106,11 +209,12 @@ public class P2PClient {
 		}
 	}
 
-	public void sendMessage(String username, String message, long messageID) {
-		Number160 storeKey = new Number160(username.hashCode());
+	public void sendMessage(Message message, MessageResult result) {
+		String receiverUsername = message.getReceiver().getName();
+		Number160 storeKey = new Number160(receiverUsername.hashCode());
 		FutureGet getIPAddress = peer.get(storeKey).start();
 
-		String messageWithUsername = username + "_" + message;
+		String messageToSend = result.getMessageId() + "_" +  peerInfo.getUsername() + "_" + message.getMessage();
 
 		getIPAddress.addListener(new BaseFutureAdapter<FutureGet>() {
 
@@ -118,13 +222,13 @@ public class P2PClient {
 				if (future.isSuccess() && future.data() != null) {
 					try {
 						PeerInfo receiverInfo = new PeerInfo(future.data().toBytes());
-						FutureDirect directMessage = peer.peer().sendDirect(receiverInfo.getPeerAddress()).object(messageWithUsername).start();
+						FutureDirect directMessage = peer.peer().sendDirect(receiverInfo.getPeerAddress()).object(messageToSend).start();
 						directMessage.addListener(new BaseFutureAdapter<FutureDirect>() {
 
 							@Override
 							public void operationComplete(FutureDirect future) throws Exception {
 								if (future.isSuccess()) {
-									System.out.println("Successfuly sent direct message!");
+									System.out.println("Successfully sent direct message!");
 
 									if (delegate != null) {
 										delegate.didSendMessage(null);
@@ -148,7 +252,7 @@ public class P2PClient {
 						}
 					}
 				} else {
-					System.err.println("Failed to retrieve data from DHT for key " + username + "!");
+					System.err.println("Failed to retrieve data from DHT for key " + receiverUsername + "!");
 					System.err.println("Reason is " + future.failedReason());
 
 					if (delegate != null) {
@@ -160,8 +264,15 @@ public class P2PClient {
 		});
 	}
 
-	public void isOnline(String username) {
-		Number160 userKey = new Number160(username.hashCode());
+	/**
+	 * Checks whether given contact is online or not
+	 * First, checks whether peer info is present in DHT. If it is present, peer isn't necessarily online.
+	 * Hence, it tries to ping it with direct message.
+	 * Upon completion, corresponding didUpdateOnlineStatus(...) delegate method is called
+	 * @param contact
+	 */
+	public void updateOnlineStatus(Contact contact) {
+		Number160 userKey = new Number160(contact.getName().hashCode());
 		FutureGet retrieveUser = peer.get(userKey).start();
 		retrieveUser.addListener(new BaseFutureAdapter<FutureGet>() {
 
@@ -169,20 +280,25 @@ public class P2PClient {
 			public void operationComplete(FutureGet future) throws Exception {
 				if(future.isSuccess() && future.data() != null) {
 					PeerInfo peerInfo = new PeerInfo(future.data().toBytes());
-					FutureDiscover discover = peer.peer().discover().peerAddress(peerInfo.getPeerAddress()).start();
-					discover.addListener(new BaseFutureAdapter<FutureDiscover>(){
+					FutureDirect pingMessage = peer.peer().sendDirect(peerInfo.getPeerAddress()).object("ping").start();
+					pingMessage.addListener(new BaseFutureAdapter<FutureDirect>() {
 
 						@Override
-						public void operationComplete(FutureDiscover future) throws Exception {
-							if(future.isDiscoveredTCP()) {
-
+						public void operationComplete(FutureDirect future) throws Exception {
+							if(future.isFailed()) {
+								System.err.println("Failed to ping " + contact.getName() + " with direct message!");
+								System.err.println(future.failedReason());
+								if (delegate != null) {
+									delegate.didUpdateOnlineStatus(contact, false, null);
+								}
 							}
-
 						}
 
 					});
 				} else {
-					/* return not online */
+					if (delegate != null) {
+						delegate.didUpdateOnlineStatus(contact, false, null);
+					}
 				}
 			}
 
@@ -229,8 +345,6 @@ public class P2PClient {
 		});
 	}
 
-	/* Helper methods */
-
 	private void bootstrap() throws LoginFailedException {
 		try {
 			InetAddress bootstrapAddress = InetAddress.getByName(BOOTSTRAP_ADDRESS);
@@ -240,7 +354,10 @@ public class P2PClient {
 				public void operationComplete(FutureBootstrap future) throws Exception {
 					if (future.isSuccess()) {
 						System.out.println("Successfully bootstrapped to server!");
-						storeUserInformationInDHT();
+
+						/* user data has fixed ttl so schedule a timer which will re-upload user data at fixed time interval */
+						userDataUploadTimer = new Timer();
+						userDataUploadTimer.schedule(new UploadUserDataTask(), USER_DATA_TTL);
 					} else {
 						System.err.println("Failed to bootstrap!");
 						System.err.println("Reason is " + future.failedReason());
@@ -259,31 +376,6 @@ public class P2PClient {
 			}
 			return;
 		}
-	}
-
-	/* upon successful bootstrapping, peer stores it's username, peer address, IP address and port in DHT */
-	private void storeUserInformationInDHT() {
-		byte[] peerData = peerInfo.toByteArray();
-		Data dataToStore = new Data(peerData);
-		FuturePut put = peer.put(peerInfo.getUsernameKey()).data(dataToStore).start();
-		put.addListener(new BaseFutureAdapter<FuturePut>() {
-
-			@Override
-			public void operationComplete(FuturePut future) throws Exception {
-				if (future.isSuccess()) {
-					System.out.println("Successfuly stored user credentials in DHT!");
-					if (delegate != null) {
-						delegate.didLogin(peerInfo, null);
-					}
-				} else {
-					System.err.println("Failed to store user credentials in DHT! Reason is " + future.failedReason());
-					if (delegate != null) {
-						delegate.didLogin(null, P2PLoginError.DHT_STORE_ERROR);
-					}
-				}
-			}
-
-		});
 	}
 
 }

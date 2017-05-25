@@ -1,6 +1,8 @@
 package com.uzh.csg.overlaynetworks.p2p;
 
 import com.uzh.csg.overlaynetworks.domain.dto.Contact;
+import com.uzh.csg.overlaynetworks.domain.dto.Message;
+import com.uzh.csg.overlaynetworks.domain.dto.MessageResult;
 import com.uzh.csg.overlaynetworks.domain.exception.LoginFailedException;
 import com.uzh.csg.overlaynetworks.domain.exception.MessageSendFailureException;
 import com.uzh.csg.overlaynetworks.p2p.error.P2PError;
@@ -18,15 +20,26 @@ public interface P2PClientDelegate {
 	public void didLogin(PeerInfo peer, P2PError error) throws LoginFailedException;
 
 	/**
-	 * Called when message has been successfully received by the peer or there was error during receival.
-	 * If @error = null, message has been successfully received, @senderUsername and @message can be read.
-	 * If @message = null and @senderUsername = null, there was an error during receival.
+	 * Called when message has been successfully received by the peer or there was error an during receive.
+	 * If @error = null, message has been successfully received, message content can be retrieved
+	 * via message.getMessage() and sender can be retrieved using message.getSender().
+	 * Use result.getMessageId() to extract message ID.
+	 * If @message = null and @messageResult = null, there was an error during receive.
 	 * Detailed information can be found by calling @error.getErrorMessage()
-	 * @param senderUsername - contains username of message sender
-	 * @param message - contains the actual message received
+	 * @param message - Message object containing message text and receiver i.e. yourself
+	 * @param result - MessageResult object containing ID of received message
+	 * @param from - Contact object containing username of message sender (can be retrieved using from.getName())
 	 * @param error - contains information about the error such as error message
 	 */
-	public void didReceiveMessage(String senderUsername, String message, P2PError error);
+	public void didReceiveMessage(Message message, Contact from, MessageResult result, P2PError error);
+
+	/**
+	 * Called when acknowledgement of message receive has been received from message-receiving party or there was an error during receive.
+	 * If @error = null, ACK message has been successfully received and ID of ACK-ed message can be retrieved via result.getMessageId().
+	 * @param result - MessageResult object containing ID of received message
+	 * @param error - contains information about the error such as error message
+	 */
+	public void didReceiveAck(MessageResult result, P2PError error);
 
 	/**
 	 * Called once message has been successfully sent or if there was an error during the sending.
@@ -37,11 +50,12 @@ public interface P2PClientDelegate {
 	public void didSendMessage(P2PError error) throws MessageSendFailureException;
 
 	/**
-	 *
-	 * @param contact
-	 * @param error
+	 * Called when online status is updated for a @contact
+	 * @param contact - contact for whom online status has updated
+	 * @param isOnline - indicates whether contact is online or offline
+	 * @param error - contains information about the error such as error message
 	 */
-	public void didDiscoverContact(Contact contact, P2PError error);
+	public void didUpdateOnlineStatus(Contact contact, boolean isOnline, P2PError error);
 
 	/**
 	 * Called when peer has been successfully shutted down or when error during shutdown occured.
