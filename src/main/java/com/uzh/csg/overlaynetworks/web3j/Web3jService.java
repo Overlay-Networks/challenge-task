@@ -13,6 +13,10 @@ import static org.web3j.tx.Contract.GAS_LIMIT;
 import static org.web3j.tx.ManagedTransaction.GAS_PRICE;
 
 abstract class Web3jService {
+    /**
+     * Returns the Web3j needed for accessing the Ethereum Blockchain credentials for accessing the blockchain node by accessing the user wallet.
+     * 
+     */
     
     private static final BigInteger MAX_GAS_PER_TX = BigInteger.valueOf(3141592L);
 

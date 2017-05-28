@@ -40,7 +40,11 @@ public final class CredentialsHelper {
             throw new IllegalStateException("Error loading credentials from wallet " + WALLET_DIR, x);
         }
     }
+    /**
+     * Returns the public wallet address of the user
 
+     * @return The wallet address as string.
+     */
     public static String getPublicKey() {
     	Credentials myCredentials = getDefaultCredentials();
     	return myCredentials.getAddress();
