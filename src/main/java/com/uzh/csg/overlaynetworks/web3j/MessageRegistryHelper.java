@@ -13,18 +13,18 @@ public final class MessageRegistryHelper {
      * Returns a web3j wrapper instance of the singleton blockchain contract 'MessageRegistry'.
      *
      * @param web3j a web3j connection
-     * @param ssdRegistryAddress an optional address
-     * @return A new instance of SSDRegistry
+     * @param messageRegistryAddress an optional address
+     * @return A new instance of MessageRegistry
      */
-    public static MessageRegistry getMessageRegistry(Web3j web3j, String ssdRegistryAddress) {
+    public static MessageRegistry getMessageRegistry(Web3j web3j, String messageRegistryAddress) {
         final MessageRegistry messageRegistry = MessageRegistry.load(
-                ssdRegistryAddress,
+                messageRegistryAddress,
                 web3j,
                 CredentialsHelper.getDefaultCredentials(),
                 MessageRegistry.GAS_PRICE,
                 MessageRegistry.GAS_LIMIT);
         if (messageRegistry == null) {
-            throw new IllegalStateException("SSDRegistry not found at " + ssdRegistryAddress);
+            throw new IllegalStateException("SSDRegistry not found at " + messageRegistryAddress);
         }
         return messageRegistry;
     }

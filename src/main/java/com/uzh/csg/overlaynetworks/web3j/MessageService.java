@@ -16,13 +16,14 @@ public class MessageService extends Web3jService{
 
 	final String contractAddress = "0xCDC2c9b31A414F8b7cd719C250ea6c650f18eb22";
     final MessageRegistry messageRegistry = MessageRegistryHelper.getMessageRegistry(this.getWeb3j(), contractAddress);
-    
+
     /**
      * Checks whether a message with a certain identifier is saved in the blockchain
-     * 
+     *
      * @param The messageID, of which the user wants to know if it is saved in the blockchain
      * @return True, if the message exists in the blockchain, false if not
      */
+
     public boolean isInBlockchain(long messageId) throws InterruptedException, ExecutionException{
     	try {
 	    	final String myMessageId = String.valueOf(messageId);
@@ -39,15 +40,17 @@ public class MessageService extends Web3jService{
 
 		}
     	catch(Exception e){
+    		e.printStackTrace();
     		return false;
     	}
     }
     /**
      * Saves a message into the blockchain. Converts the long to the needed Uint256 and the String to an Utf8String.
-     * 
+     *
      * @param The message to be saved
      * @param The messageID of the message that should be saved to the blockchain
      */
+
     public void writeToBlockchain(Message message, long messageId) throws InterruptedException, ExecutionException {
         final String idString = String.valueOf(messageId);
         final BigInteger myBigInt = new BigInteger(idString);
