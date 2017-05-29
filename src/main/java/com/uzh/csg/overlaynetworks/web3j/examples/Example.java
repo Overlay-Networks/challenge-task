@@ -1,4 +1,4 @@
-package com.uzh.csg.overlaynetworks.web3j;
+package com.uzh.csg.overlaynetworks.web3j.examples;
 
 import org.web3j.crypto.Credentials;
 
@@ -31,7 +31,7 @@ public interface Example<R> {
      * @param gasValue the amount of Ether for the transaction. Unused Gas is returned back to the user.
      * @return computation result
      */
-	
+
     R run(Web3j web3j, Credentials credentials, BigInteger gasPrice, BigInteger gasLimit, BigInteger gasValue);
 
 }

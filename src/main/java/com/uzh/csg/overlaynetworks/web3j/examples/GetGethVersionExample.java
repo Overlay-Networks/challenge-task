@@ -1,4 +1,4 @@
-package com.uzh.csg.overlaynetworks.web3j;
+package com.uzh.csg.overlaynetworks.web3j.examples;
 
 import com.uzh.csg.overlaynetworks.web3j.AsyncHelper;
 
@@ -15,7 +15,7 @@ import java.math.BigInteger;
  */
 
 public class GetGethVersionExample implements Example<String> {
-	
+
      @Override
     public String run(Web3j web3j, Credentials credentials, BigInteger gasPrice, BigInteger gasLimit, BigInteger gasValue) {
         final Request<?, Web3ClientVersion> asyncRequest = web3j.web3ClientVersion();

@@ -1,6 +1,6 @@
 import org.junit.Test;
 
-import com.uzh.csg.overlaynetworks.web3j.GetGethVersionExample;
+import com.uzh.csg.overlaynetworks.web3j.examples.GetGethVersionExample;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -13,4 +13,4 @@ public class GetGethVersionExampleTest extends AbstractLocalhostTest {
         assertThat(version).isEqualTo("Geth/v1.5.9-stable-a07539fb/darwin/go1.8");
     }
 
-} 
+}
