@@ -1,31 +1,29 @@
 package com.uzh.csg.overlaynetworks.p2p;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.UnknownHostException;
-import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import com.uzh.csg.overlaynetworks.domain.exception.LoginFailedException;
-import com.uzh.csg.overlaynetworks.p2p.error.*;
+import com.uzh.csg.overlaynetworks.domain.dto.Contact;
 import com.uzh.csg.overlaynetworks.domain.dto.Message;
 import com.uzh.csg.overlaynetworks.domain.dto.MessageResult;
-import com.uzh.csg.overlaynetworks.domain.dto.Contact;
-
+import com.uzh.csg.overlaynetworks.domain.exception.LoginFailedException;
+import com.uzh.csg.overlaynetworks.p2p.error.P2PLoginError;
+import com.uzh.csg.overlaynetworks.p2p.error.P2PReceiveMessageError;
+import com.uzh.csg.overlaynetworks.p2p.error.P2PSendMessageError;
+import com.uzh.csg.overlaynetworks.p2p.error.P2PShutdownError;
 import net.tomp2p.connection.Bindings;
-import net.tomp2p.dht.FutureGet;
-import net.tomp2p.dht.FuturePut;
-import net.tomp2p.dht.FutureRemove;
-import net.tomp2p.dht.PeerBuilderDHT;
-import net.tomp2p.dht.PeerDHT;
+import net.tomp2p.dht.*;
 import net.tomp2p.futures.*;
+import net.tomp2p.p2p.AutomaticFuture;
+import net.tomp2p.p2p.JobScheduler;
 import net.tomp2p.p2p.PeerBuilder;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.rpc.ObjectDataReply;
 import net.tomp2p.storage.Data;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.UnknownHostException;
+import java.util.Random;
 
 public class P2PClient {
 
@@ -37,49 +35,22 @@ public class P2PClient {
 
 	private Random random;
 
-	private Timer userDataUploadTimer;
+	private JobScheduler userDataUploader;
 
 	/* bootstrapping server IP and port are fixed constants */
 	private static final String BOOTSTRAP_ADDRESS = "127.0.0.1";
-	private static final int BOOTSTRAP_PORT = 65223;
+	private static final int BOOTSTRAP_PORT = 49829;
 
 	/* TTL for peer credentials */
 	private static final int USER_DATA_TTL = 60;
 
-	/* Private class that is response for pushing user data to the DHT */
-	private class UploadUserDataTask extends TimerTask {
-
-		@Override
-		public void run() {
-			byte[] peerData = peerInfo.toByteArray();
-			Data dataToStore = new Data(peerData);
-			dataToStore.ttlSeconds(USER_DATA_TTL);
-			FuturePut put = peer.put(peerInfo.getUsernameKey()).data(dataToStore).start();
-			put.addListener(new BaseFutureAdapter<FuturePut>() {
-
-				@Override
-				public void operationComplete(FuturePut future) throws Exception {
-					if (future.isSuccess()) {
-						System.out.println("Successfully stored user credentials in DHT!");
-						if (delegate != null) {
-							delegate.didLogin(peerInfo, null);
-						}
-					} else {
-						System.err.println("Failed to store user credentials in DHT! Reason is " + future.failedReason());
-						if (delegate != null) {
-							delegate.didLogin(null, P2PLoginError.DHT_STORE_ERROR);
-						}
-					}
-				}
-
-			});
-		}
-
-	}
-
 	public P2PClient(String username) {
 		this.peerInfo = new PeerInfo(username);
 		random = new Random(85L);
+	}
+
+	public PeerInfo getPeerInfo() {
+		return this.peerInfo;
 	}
 
 	public void start() throws LoginFailedException {
@@ -123,7 +94,7 @@ public class P2PClient {
 										if (future.isSuccess()) {
 											System.out.println("Successfully acknowledged incoming message!");
 										} else {
-											System.err.println("Failed to acknoweldge for incoming message!");
+											System.err.println("Failed to acknowledge for incoming message!");
 											System.err.println("Reason is: " + future.failedReason());
 										}
 									}
@@ -210,9 +181,9 @@ public class P2PClient {
 	}
 
 	public void sendMessage(Message message, MessageResult result) {
-		String receiverUsername = message.getReceiver().getName();
-		Number160 storeKey = new Number160(receiverUsername.hashCode());
-		FutureGet getIPAddress = peer.get(storeKey).start();
+		PeerInfo receiverInfo = new PeerInfo(message.getReceiver().getName());
+		System.out.println("GETTING " + receiverInfo.getUsername() + " DATA using " + receiverInfo.getUsernameKey().toString());
+		FutureGet getIPAddress = peer.get(receiverInfo.getUsernameKey()).start();
 
 		String messageToSend = result.getMessageId() + "_" +  peerInfo.getUsername() + "_" + message.getMessage();
 
@@ -252,7 +223,7 @@ public class P2PClient {
 						}
 					}
 				} else {
-					System.err.println("Failed to retrieve data from DHT for key " + receiverUsername + "!");
+					System.err.println("Failed to retrieve data from DHT for key " + receiverInfo.getUsername() + "!");
 					System.err.println("Reason is " + future.failedReason());
 
 					if (delegate != null) {
@@ -355,9 +326,30 @@ public class P2PClient {
 					if (future.isSuccess()) {
 						System.out.println("Successfully bootstrapped to server!");
 
-						/* user data has fixed ttl so schedule a timer which will re-upload user data at fixed time interval */
-						userDataUploadTimer = new Timer();
-						userDataUploadTimer.schedule(new UploadUserDataTask(), USER_DATA_TTL);
+
+						byte[] peerData = peerInfo.toByteArray();
+						Data dataToStore = new Data(peerData);
+						//dataToStore.ttlSeconds(USER_DATA_TTL);
+						PutBuilder userDataPut = peer.put(peerInfo.getUsernameKey()).data(dataToStore);
+						System.out.println("STORED DATA FOR " + peerInfo.getUsername() + " under " + peerInfo.getUsernameKey().toString());
+						userDataUploader = new JobScheduler(peer.peer());
+						userDataUploader.start(userDataPut, (USER_DATA_TTL - 10) * 1000, -1, new AutomaticFuture() {
+
+							@Override
+							public void futureCreated(BaseFuture future) {
+								if(future.isSuccess()) {
+									System.out.println("Added data to DHT for peer " + peerInfo.getUsername());
+								} else {
+									System.err.println("Failed adding data to DHT for peer " + peerInfo.getUsername() + "!");
+									System.err.println(future.failedReason());
+								}
+							}
+
+						});
+
+						if (delegate != null) {
+							delegate.didLogin(peerInfo, null);
+						}
 					} else {
 						System.err.println("Failed to bootstrap!");
 						System.err.println("Reason is " + future.failedReason());
