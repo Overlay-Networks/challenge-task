@@ -7,15 +7,19 @@ import org.web3j.crypto.WalletUtils;
 import java.io.File;
 
 public final class CredentialsHelper {
-
+	
+	private static final int userno = 1;
     private static final String WALLET_DIR = "wallet/";
-    private static final String DEFAULT_USER = "default";
     private static final String DEFAULT_PASS = "test123";
+    private static final String DEFAULT_USER = "default";
+
 
     private CredentialsHelper() {
         throw new IllegalAccessError();
     }
+    
 
+    
     /**
      * Loads the credentials of the default user 0x5bbb245a661c4c112aa0e848a2bb007ba3e9b628
      *
@@ -23,6 +27,12 @@ public final class CredentialsHelper {
      */
     
     public static Credentials getDefaultCredentials() {
+    	switch (userno) {
+    	case 1: return getCredentials("default", DEFAULT_PASS);
+    	case 2: return getCredentials("wallet2", DEFAULT_PASS);
+    	case 3: return getCredentials("wallet3", DEFAULT_PASS);
+    	case 4: return getCredentials("wallet4", DEFAULT_PASS);
+    	}
         return getCredentials(DEFAULT_USER, DEFAULT_PASS);
     }
 

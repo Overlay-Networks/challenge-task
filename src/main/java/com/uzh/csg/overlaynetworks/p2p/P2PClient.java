@@ -33,6 +33,7 @@ public class P2PClient {
 	private PeerDHT peer;
 	private PeerInfo peerInfo;
 
+
 	private Random random;
 
 	private JobScheduler userDataUploader;
@@ -44,6 +45,7 @@ public class P2PClient {
 	/* TTL for peer credentials */
 	private static final int USER_DATA_TTL = 60;
 
+	
 	public P2PClient(String username) {
 		this.peerInfo = new PeerInfo(username);
 		random = new Random(85L);
