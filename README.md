@@ -20,9 +20,9 @@ The challenge task in the lecture Overlay Networks at the University of Zurich.
 - The application accesses a smart contract on the ethereum Test Network Ropsten(Revival). The contract written in solidity is to be found in the `Ethereum` folder. 
   - The contract saves the sender's address, the receipients address (optional), the message to be saved and the timestamp of the block where the message is saved. 
   - It is only possible to save one message per identifier, such that nobody can overwrite a message that has been saved. -
-  - The MessageRegistry can be found under the following address: ´0xCDC2c9b31A414F8b7cd719C250ea6c650f18eb22´
-  - The smart contract was wrapped with the Web3j wrapper. The wrapped contract can be found under ´com.uzh.csg.overlaynetworks.wrappers´. The MessageRegistry.java is used to access the contract. Do not change the automatically generated code. 
-
+  - The MessageRegistry can be found under the following address: `0xCDC2c9b31A414F8b7cd719C250ea6c650f18eb22`
+  - The smart contract was wrapped with the Web3j wrapper. The wrapped contract can be found under `com.uzh.csg.overlaynetworks.wrappers`. The `MessageRegistry.java` is used to access the contract on the blockchain and provides access to its functions. Do not change the automatically generated code. 
+ 
 
 ## API Documentation
 - You can find the Swagger REST documentation on http://localhost:8080/swagger-ui.html
