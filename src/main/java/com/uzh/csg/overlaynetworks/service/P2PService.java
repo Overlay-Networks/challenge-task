@@ -115,6 +115,12 @@ public class P2PService implements P2PClientDelegate {
 	}
 
 	/*
+	* receives message which are directed to this user.
+	* redirects the message to the socket controller (front-end).
+	* result is returned asynchronously via websockets
+	*/
+
+	/*
  	* receives message which are directed to this user.
  	* redirects the message to the socket controller (front-end).
  	* result is returned asynchronously via websockets

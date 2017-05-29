@@ -35,13 +35,14 @@ public class P2PClient {
 	private PeerDHT peer;
 	private PeerInfo peerInfo;
 
+	
 	private Random random;
 
 	private Timer userDataUploadTimer;
 
 	/* bootstrapping server IP and port are fixed constants */
 	private static final String BOOTSTRAP_ADDRESS = "127.0.0.1";
-	private static final int BOOTSTRAP_PORT = 65223;
+	private static final int BOOTSTRAP_PORT = 63803;
 
 	/* TTL for peer credentials */
 	private static final int USER_DATA_TTL = 60;
@@ -56,7 +57,6 @@ public class P2PClient {
 			dataToStore.ttlSeconds(USER_DATA_TTL);
 			FuturePut put = peer.put(peerInfo.getUsernameKey()).data(dataToStore).start();
 			put.addListener(new BaseFutureAdapter<FuturePut>() {
-
 				@Override
 				public void operationComplete(FuturePut future) throws Exception {
 					if (future.isSuccess()) {
