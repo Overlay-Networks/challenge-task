@@ -11,6 +11,7 @@ import com.uzh.csg.overlaynetworks.p2p.error.P2PShutdownError;
 import net.tomp2p.connection.Bindings;
 import net.tomp2p.dht.*;
 import net.tomp2p.futures.*;
+import net.tomp2p.p2p.AutomaticFuture;
 import net.tomp2p.p2p.JobScheduler;
 import net.tomp2p.p2p.PeerBuilder;
 import net.tomp2p.peers.Number160;
@@ -73,17 +74,30 @@ public class P2PClient {
 				public Object reply(PeerAddress sender, Object request) throws Exception {
 					if (request instanceof String) {
 						String payload = (String) request;
-						int IDandUsernameSeparatorIndex = payload.indexOf("_");
-						int UsernameAndMessageSeparatorIndex = payload.lastIndexOf("_");
-						if (IDandUsernameSeparatorIndex > 0 && UsernameAndMessageSeparatorIndex > 0 && IDandUsernameSeparatorIndex != UsernameAndMessageSeparatorIndex) {
+						int notaryAndIDSeparatorIndex = payload.indexOf("_");
+						int idAndUsernameSeparatorIndex = payload.indexOf("_", notaryAndIDSeparatorIndex);
+						int usernameAndMessageSeparatorIndex = payload.lastIndexOf("_");
+						if (notaryAndIDSeparatorIndex > 0 && idAndUsernameSeparatorIndex > 0 && usernameAndMessageSeparatorIndex > 0) {
 							try {
-								String messageIDStr = payload.substring(0, IDandUsernameSeparatorIndex);
+								String notary = payload.substring(0, notaryAndIDSeparatorIndex);
+								boolean isSigned = false;
+								if(notary == "0") {
+									isSigned = false;
+								} else if (notary == "1") {
+									isSigned = true;
+								} else {
+									if(delegate != null) {
+										delegate.didReceiveMessage(null, null, null, P2PReceiveMessageError.INVALID_MESSAGE_FORMAT);
+									}
+								}
+								String messageIDStr = payload.substring(notaryAndIDSeparatorIndex + 1, idAndUsernameSeparatorIndex);
 								long messageID = Long.parseLong(messageIDStr);
-								String username = payload.substring(IDandUsernameSeparatorIndex+1, UsernameAndMessageSeparatorIndex);
-								String message = payload.substring(UsernameAndMessageSeparatorIndex+1, payload.length());
+								String username = payload.substring(idAndUsernameSeparatorIndex+1, usernameAndMessageSeparatorIndex);
+								String message = payload.substring(usernameAndMessageSeparatorIndex+1, payload.length());
 
 								Message messageObj = new Message();
 								messageObj.setMessage(message);
+								messageObj.setNotary(isSigned);
 								Contact contact = new Contact(username);
 								MessageResult result = new MessageResult(messageID);
 
@@ -183,11 +197,8 @@ public class P2PClient {
 
 	public void sendMessage(Message message, MessageResult result) {
 		PeerInfo receiverInfo = new PeerInfo(message.getReceiver().getName());
-		System.out.println("GETTING " + receiverInfo.getUsername() + " DATA using " + receiverInfo.getUsernameKey().toString());
 		FutureGet getIPAddress = peer.get(receiverInfo.getUsernameKey()).start();
-
-		String messageToSend = result.getMessageId() + "_" +  peerInfo.getUsername() + "_" + message.getMessage();
-
+		String messageToSend = (message.getNotary() ? "1" : "0") + "_" + result.getMessageId() + "_" +  peerInfo.getUsername() + "_" + message.getMessage();
 		getIPAddress.addListener(new BaseFutureAdapter<FutureGet>() {
 
 			public void operationComplete(FutureGet future) throws Exception {
@@ -329,35 +340,35 @@ public class P2PClient {
 
 						byte[] peerData = peerInfo.toByteArray();
 						Data dataToStore = new Data(peerData);
-						//dataToStore.ttlSeconds(USER_DATA_TTL);
-						//PutBuilder userDataPut = peer.put(peerInfo.getUsernameKey()).data(dataToStore);
-						FuturePut userDataPut = peer.put(peerInfo.getUsernameKey()).data(dataToStore).start();
-						userDataPut.addListener(new BaseFutureAdapter<FuturePut>() {
+						dataToStore.ttlSeconds(USER_DATA_TTL);
+						PutBuilder userDataPut = peer.put(peerInfo.getUsernameKey()).data(dataToStore);
+						//FuturePut userDataPut = peer.put(peerInfo.getUsernameKey()).data(dataToStore).start();
+//						userDataPut.addListener(new BaseFutureAdapter<FuturePut>() {
+//
+//							@Override
+//							public void operationComplete(FuturePut future) throws Exception {
+//								if(future.isFailed()) {
+//									System.err.println("Failed to store user data in DHT! Reason is " + future.failedReason());
+//								} else if(future.isSuccess()) {
+//									System.out.println("STORED DATA FOR " + peerInfo.getUsername() + " under " + peerInfo.getUsernameKey().toString());
+//								}
+//							}
+//
+//						});
+						userDataUploader = new JobScheduler(peer.peer());
+						userDataUploader.start(userDataPut, (USER_DATA_TTL - 10) * 1000, -1, new AutomaticFuture() {
 
 							@Override
-							public void operationComplete(FuturePut future) throws Exception {
-								if(future.isFailed()) {
-									System.err.println("Failed to store user data in DHT! Reason is " + future.failedReason());
-								} else if(future.isSuccess()) {
-									System.out.println("STORED DATA FOR " + peerInfo.getUsername() + " under " + peerInfo.getUsernameKey().toString());
+							public void futureCreated(BaseFuture future) {
+								if(future.isSuccess()) {
+									System.out.println("Added data to DHT for peer " + peerInfo.getUsername());
+								} else {
+									System.err.println("Failed adding data to DHT for peer " + peerInfo.getUsername() + "!");
+									System.err.println(future.failedReason());
 								}
 							}
 
 						});
-						//userDataUploader = new JobScheduler(peer.peer());
-						//userDataUploader.start(userDataPut, (USER_DATA_TTL - 10) * 1000, -1, new AutomaticFuture() {
-
-						//	@Override
-						//	public void futureCreated(BaseFuture future) {
-						//		if(future.isSuccess()) {
-						//			System.out.println("Added data to DHT for peer " + peerInfo.getUsername());
-						//		} else {
-						//			System.err.println("Failed adding data to DHT for peer " + peerInfo.getUsername() + "!");
-						//			System.err.println(future.failedReason());
-						//		}
-						//	}
-
-						//});
 
 						if (delegate != null) {
 							delegate.didLogin(peerInfo, null);
