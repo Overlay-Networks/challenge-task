@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.UnknownHostException;
+import java.util.List;
 import java.util.Random;
 
 public class P2PClient {
@@ -33,19 +34,18 @@ public class P2PClient {
 	private PeerDHT peer;
 	private PeerInfo peerInfo;
 
-
 	private Random random;
 
 	private JobScheduler userDataUploader;
 
 	/* bootstrapping server IP and port are fixed constants */
 	private static final String BOOTSTRAP_ADDRESS = "127.0.0.1";
-	private static final int BOOTSTRAP_PORT = 49829;
+	private static final int BOOTSTRAP_PORT = 37823;
 
 	/* TTL for peer credentials */
 	private static final int USER_DATA_TTL = 60;
 
-	
+
 	public P2PClient(String username) {
 		this.peerInfo = new PeerInfo(username);
 		random = new Random(85L);
@@ -328,26 +328,45 @@ public class P2PClient {
 					if (future.isSuccess()) {
 						System.out.println("Successfully bootstrapped to server!");
 
+						System.out.println("--------------------------------------");
+						System.out.println("MY PEER MAP");
+						List<PeerAddress> peers = peer.peerBean().peerMap().all();
+						for(PeerAddress peerAddress : peers) {
+							System.out.println(peerAddress);
+						}
+						System.out.println("--------------------------------------");
 
 						byte[] peerData = peerInfo.toByteArray();
 						Data dataToStore = new Data(peerData);
 						//dataToStore.ttlSeconds(USER_DATA_TTL);
-						PutBuilder userDataPut = peer.put(peerInfo.getUsernameKey()).data(dataToStore);
-						System.out.println("STORED DATA FOR " + peerInfo.getUsername() + " under " + peerInfo.getUsernameKey().toString());
-						userDataUploader = new JobScheduler(peer.peer());
-						userDataUploader.start(userDataPut, (USER_DATA_TTL - 10) * 1000, -1, new AutomaticFuture() {
+						//PutBuilder userDataPut = peer.put(peerInfo.getUsernameKey()).data(dataToStore);
+						FuturePut userDataPut = peer.put(peerInfo.getUsernameKey()).data(dataToStore).start();
+						userDataPut.addListener(new BaseFutureAdapter<FuturePut>() {
 
 							@Override
-							public void futureCreated(BaseFuture future) {
-								if(future.isSuccess()) {
-									System.out.println("Added data to DHT for peer " + peerInfo.getUsername());
-								} else {
-									System.err.println("Failed adding data to DHT for peer " + peerInfo.getUsername() + "!");
-									System.err.println(future.failedReason());
+							public void operationComplete(FuturePut future) throws Exception {
+								if(future.isFailed()) {
+									System.err.println("Failed to store user data in DHT! Reason is " + future.failedReason());
+								} else if(future.isSuccess()) {
+									System.out.println("STORED DATA FOR " + peerInfo.getUsername() + " under " + peerInfo.getUsernameKey().toString());
 								}
 							}
 
 						});
+						//userDataUploader = new JobScheduler(peer.peer());
+						//userDataUploader.start(userDataPut, (USER_DATA_TTL - 10) * 1000, -1, new AutomaticFuture() {
+
+						//	@Override
+						//	public void futureCreated(BaseFuture future) {
+						//		if(future.isSuccess()) {
+						//			System.out.println("Added data to DHT for peer " + peerInfo.getUsername());
+						//		} else {
+						//			System.err.println("Failed adding data to DHT for peer " + peerInfo.getUsername() + "!");
+						//			System.err.println(future.failedReason());
+						//		}
+						//	}
+
+						//});
 
 						if (delegate != null) {
 							delegate.didLogin(peerInfo, null);

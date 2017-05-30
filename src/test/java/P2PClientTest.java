@@ -9,6 +9,7 @@ import com.uzh.csg.overlaynetworks.p2p.PeerInfo;
 import com.uzh.csg.overlaynetworks.p2p.error.P2PError;
 
 import javafx.util.Pair;
+import net.tomp2p.dht.PeerDHT;
 
 import java.util.ArrayList;
 import java.util.HashMap;
