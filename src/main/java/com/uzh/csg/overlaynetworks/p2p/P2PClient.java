@@ -148,28 +148,7 @@ public class P2PClient {
 									delegate.didReceiveAck(null, P2PReceiveMessageError.INVALID_MESSAGE_FORMAT);
 								}
 							}
-						} else if(payload.compareTo("ping") == 0) {
-							FutureDirect pingACKMessage = peer.peer().sendDirect(sender).object("pingACK_" + peerInfo.getUsername()).start();
-							pingACKMessage.addListener(new BaseFutureAdapter<FutureDirect>() {
-
-								@Override
-								public void operationComplete(FutureDirect future) throws Exception {
-									if(future.isFailed()) {
-										System.err.println("Failed to send ping ACK!");
-										System.err.println("Reason is: " + future.failedReason());
-									}
-								}
-
-							});
-						} else if(payload.startsWith("pingACK_")) {
-							String username = payload.substring(payload.indexOf("_") + 1, payload.length());
-							Contact contact = new Contact(username);
-							if (delegate != null) {
-								delegate.didUpdateOnlineStatus(contact, ContactStatus.ONLINE, null);
-							}
-						}
-
-						else {
+						} else {
 							if (delegate != null) {
 								delegate.didReceiveMessage(null, null, null, P2PReceiveMessageError.INVALID_MESSAGE_FORMAT);
 							}
@@ -181,7 +160,6 @@ public class P2PClient {
 					}
 					return null;
 				}
-
 			});
 
 			peerInfo.setInetAddress(address);
@@ -310,25 +288,16 @@ public class P2PClient {
 			@Override
 			public void operationComplete(FutureGet future) throws Exception {
 				if(future.isSuccess() && future.data() != null) {
-					PeerInfo peerInfo = new PeerInfo(future.data().toBytes());
-					FutureDirect pingMessage = peer.peer().sendDirect(peerInfo.getPeerAddress()).object("ping").start();
-					pingMessage.addListener(new BaseFutureAdapter<FutureDirect>() {
-
-						@Override
-						public void operationComplete(FutureDirect future) throws Exception {
-							if(future.isFailed()) {
-								System.err.println("Failed to ping " + contact.getName() + " with direct message!");
-								System.err.println(future.failedReason());
-								if (delegate != null) {
-									delegate.didUpdateOnlineStatus(contact, ContactStatus.OFFLINE, null);
-								}
-							}
-						}
-
-					});
-				} else {
+					if (delegate != null) {
+						delegate.didUpdateOnlineStatus(contact, ContactStatus.ONLINE, null);
+					}
+				} else if (future.isCompleted()) {
 					if (delegate != null) {
 						delegate.didUpdateOnlineStatus(contact, ContactStatus.OFFLINE, null);
+					}
+				} else {
+					if (delegate != null) {
+						delegate.didUpdateOnlineStatus(contact, ContactStatus.UNDETERMINED, null);
 					}
 				}
 			}
