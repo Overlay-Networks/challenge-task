@@ -325,13 +325,23 @@ public class P2PClient {
 			bootstrap.addListener(new BaseFutureAdapter<FutureBootstrap>() {
 
 				public void operationComplete(FutureBootstrap future) throws Exception {
+					future.
 					if (future.isSuccess()) {
 						System.out.println("Successfully bootstrapped to server!");
 
+						Thread.sleep(5000);
 						System.out.println("--------------------------------------");
-						System.out.println("MY PEER MAP");
+						System.out.println("MY PEER MAP (VERIFIED)");
 						List<PeerAddress> peers = peer.peerBean().peerMap().all();
 						for(PeerAddress peerAddress : peers) {
+							System.out.println(peerAddress);
+						}
+						System.out.println("--------------------------------------");
+
+						System.out.println("--------------------------------------");
+						System.out.println("MY PEER MAP (UNVERIFIED)");
+						List<PeerAddress> peersUnverified = peer.peerBean().peerMap().allOverflow();
+						for(PeerAddress peerAddress : peersUnverified) {
 							System.out.println(peerAddress);
 						}
 						System.out.println("--------------------------------------");
