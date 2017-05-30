@@ -10,11 +10,7 @@ import com.uzh.csg.overlaynetworks.p2p.PeerInfo;
 import com.uzh.csg.overlaynetworks.p2p.error.P2PError;
 
 import javafx.util.Pair;
-import net.tomp2p.p2p.Peer;
-
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -28,11 +24,11 @@ public class P2PClientTest implements P2PClientDelegate {
 	private class PeerState {
 
 		boolean isLoggedIn;
-		Map<Long, Pair<Boolean, Boolean>> messages;
+		Pair<MessageResult, Pair<Boolean, Boolean>> messageState;
 
 		public PeerState() {
 			this.isLoggedIn = false;
-			this.messages = new HashMap<>();
+			this.messageState = new Pair<>(null, new Pair<>(false, false));
 		}
 
 	}
@@ -76,23 +72,18 @@ public class P2PClientTest implements P2PClientDelegate {
 			message.setReceiver(new Contact(receivingClient.getKey().getPeerInfo().getUsername()));
 			message.setMessage("Message with contents");
 			MessageResult result = new MessageResult();
-			receivingClient.getValue().messages.put(result.getMessageId(), new Pair<>(false, false));
-			sendingClient.getKey().sendMessage(message, result);
+			receivingClient.getValue().messageState = new Pair<>(result, new Pair<>(false, false));
+			try {
+				sendingClient.getKey().sendMessage(message, result);
+			} catch (MessageSendFailureException msfe) {
+				msfe.printStackTrace();
+			}
 		}
 	}
 
 	private boolean allClientsLoggedIn() {
 		for(Pair<P2PClient, PeerState> client : clients) {
 			if(!client.getValue().isLoggedIn) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	private boolean allMessagesAcked(Pair<P2PClient, PeerState> client) {
-		for(Map.Entry<Long, Pair<Boolean, Boolean>> messageState : client.getValue().messages.entrySet()) {
-			if(!(messageState.getValue().getKey() && messageState.getValue().getValue())) {
 				return false;
 			}
 		}
@@ -125,25 +116,19 @@ public class P2PClientTest implements P2PClientDelegate {
 			System.err.println("Failed to send message! Error is: " + error.getErrorMessage());
 		} else {
 			System.out.println("Received message " + message.getMessage() + " from " + from.getName() + "!");
-			for(Pair<P2PClient, PeerState> client : clients) {
-				PeerInfo clientInfo = client.getKey().getPeerInfo();
-				if(clientInfo.getUsername().compareTo(from.getName()) == 0) {
-					client.getValue().messages.put(result.getMessageId(), new Pair<>(true, false));
-				}
-			}
 		}
 	}
 
 	public void didReceiveAck(MessageResult result, P2PError error) {
 		for(Pair<P2PClient, PeerState> client : clients) {
-			Pair<Boolean, Boolean> messageState = client.getValue().messages.get(result.getMessageId());
-			if(messageState != null) {
-				client.getValue().messages.put(result.getMessageId(), new Pair<>(true, true));
+			if(client.getValue().messageState.getKey().getMessageId() == result.getMessageId()) {
+				client.getValue().messageState = new Pair<>(result, new Pair<>(true, true));
 			}
 		}
-		boolean allMessagesReceived = false;
+		boolean allMessagesReceived = true;
 		for (Pair<P2PClient, PeerState> client : clients) {
-			allMessagesReceived &= allMessagesAcked(client);
+			Pair<Boolean, Boolean> messageState = client.getValue().messageState.getValue();
+			allMessagesReceived &= messageState.getKey() && messageState.getValue();
 
 		}
 		if(allMessagesReceived) {
@@ -155,6 +140,10 @@ public class P2PClientTest implements P2PClientDelegate {
 		if(error != null) {
 			System.err.println("Error sending P2P message! " + error.getErrorMessage());
 		}
+	}
+
+	public void didDiscoverContact(PeerInfo contactInfo, P2PError error) {
+
 	}
 
 	public void didUpdateOnlineStatus(Contact contact, ContactStatus status, P2PError error) {

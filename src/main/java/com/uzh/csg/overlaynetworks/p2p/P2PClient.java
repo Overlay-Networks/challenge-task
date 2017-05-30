@@ -5,10 +5,8 @@ import com.uzh.csg.overlaynetworks.domain.dto.ContactStatus;
 import com.uzh.csg.overlaynetworks.domain.dto.Message;
 import com.uzh.csg.overlaynetworks.domain.dto.MessageResult;
 import com.uzh.csg.overlaynetworks.domain.exception.LoginFailedException;
-import com.uzh.csg.overlaynetworks.p2p.error.P2PLoginError;
-import com.uzh.csg.overlaynetworks.p2p.error.P2PReceiveMessageError;
-import com.uzh.csg.overlaynetworks.p2p.error.P2PSendMessageError;
-import com.uzh.csg.overlaynetworks.p2p.error.P2PShutdownError;
+import com.uzh.csg.overlaynetworks.domain.exception.MessageSendFailureException;
+import com.uzh.csg.overlaynetworks.p2p.error.*;
 import net.tomp2p.connection.Bindings;
 import net.tomp2p.dht.*;
 import net.tomp2p.futures.*;
@@ -40,7 +38,7 @@ public class P2PClient {
 
 	/* bootstrapping server IP and port are fixed constants */
 	private static final String BOOTSTRAP_ADDRESS = "127.0.0.1";
-	private static final int BOOTSTRAP_PORT = 49689;
+	private static final int BOOTSTRAP_PORT = 50518;
 
 	/* TTL for peer credentials */
 	private static final int USER_DATA_TTL = 60;
@@ -55,6 +53,12 @@ public class P2PClient {
 		return this.peerInfo;
 	}
 
+	/**
+	 * Bootstraps peer to the server
+	 * Stores peer credentials in DHT
+	 * Setup routine how to handle incoming messages for peer
+	 * @throws LoginFailedException
+	 */
 	public void start() throws LoginFailedException {
 		try {
 			ServerSocket socket = new ServerSocket(0, 0, InetAddress.getByName(null));
@@ -110,7 +114,7 @@ public class P2PClient {
 										if (future.isSuccess()) {
 											System.out.println("Successfully acknowledged incoming message!");
 										} else {
-											System.err.println("Failed to acknowledge for incoming message!");
+											System.err.println("Failed to acknowledge incoming message!");
 											System.err.println("Reason is: " + future.failedReason());
 										}
 									}
@@ -196,7 +200,18 @@ public class P2PClient {
 		}
 	}
 
-	public void sendMessage(Message message, MessageResult result) {
+	/**
+	 * Sends direct message to the contact specified in @message.getReceiver()
+	 * @param message
+	 * @param result
+	 */
+	public void sendMessage(Message message, MessageResult result) throws MessageSendFailureException {
+		if (message.getReceiver() == null) {
+			if (delegate != null) {
+				delegate.didSendMessage(P2PSendMessageError.USER_NOT_FOUND);
+			}
+			return;
+		}
 		PeerInfo receiverInfo = new PeerInfo(message.getReceiver().getName());
 		FutureGet getIPAddress = peer.get(receiverInfo.getUsernameKey()).start();
 		String messageToSend = (message.getNotary() ? "1" : "0") + "_" + result.getMessageId() + "_" +  peerInfo.getUsername() + "_" + message.getMessage();
@@ -249,6 +264,38 @@ public class P2PClient {
 	}
 
 	/**
+	 * Checks whether given contact is currently present in DHT
+	 * Upon completion, corresponding delegate method is called
+	 * @param contact
+	 */
+	public void discoverContact(Contact contact) {
+		PeerInfo contactInfo = new PeerInfo(contact.getName());
+		FutureGet getContact = peer.get(contactInfo.getUsernameKey()).start();
+		getContact.addListener(new BaseFutureAdapter<FutureGet>() {
+
+			@Override
+			public void operationComplete(FutureGet future) throws Exception {
+				if(future.isSuccess() && future.data() != null) {
+					if (delegate != null) {
+						PeerInfo receivedInfo = new PeerInfo(future.data().toBytes());
+						delegate.didDiscoverContact(receivedInfo, null);
+					}
+				} else if (future.isCompleted()) {
+					if (delegate != null) {
+						delegate.didDiscoverContact(null, P2PDiscoverContactError.CONTACT_NOT_PRESENT);
+					}
+				} else {
+					System.err.println("Contact discovery failed: " + future.failedReason());
+					if (delegate != null) {
+						delegate.didDiscoverContact(null, P2PDiscoverContactError.DISCOVERY_ERROR);
+					}
+				}
+			}
+
+		});
+	}
+
+	/**
 	 * Checks whether given contact is online or not
 	 * First, checks whether peer info is present in DHT. If it is present, peer isn't necessarily online.
 	 * Hence, it tries to ping it with direct message.
@@ -289,6 +336,9 @@ public class P2PClient {
 		});
 	}
 
+	/**
+	 * Shutdowns peer 'nicely' announcing that in P2P system and removing credentials from DHT
+	 */
 	public void shutdown() {
 		FutureRemove removeData = peer.remove(peerInfo.getUsernameKey()).start();
 		removeData.addListener(new BaseFutureAdapter<FutureRemove>() {
@@ -329,6 +379,13 @@ public class P2PClient {
 		});
 	}
 
+	/**
+	 * Helper function which bootstraps peer to the bootstrapping server
+	 * Bootstrapping server credentials are specified on top of the file using:
+	 * - BOOTSTRAP_ADDRESS
+	 * - BOOTSTRAP_PORT
+	 * @throws LoginFailedException
+	 */
 	private void bootstrap() throws LoginFailedException {
 		try {
 			InetAddress bootstrapAddress = InetAddress.getByName(BOOTSTRAP_ADDRESS);

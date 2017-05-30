@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import com.uzh.csg.overlaynetworks.domain.exception.LoginFailedException;
+import com.uzh.csg.overlaynetworks.domain.exception.MessageSendFailureException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -94,7 +95,7 @@ public class MainRestController {
 			value = "/send-message",
 			method = POST,
 			consumes = APPLICATION_JSON_UTF8_VALUE)
-	public MessageResult sendMessage(@RequestBody Message message) throws InterruptedException, ExecutionException {
+	public MessageResult sendMessage(@RequestBody Message message) throws InterruptedException, ExecutionException, MessageSendFailureException {
 
 		MessageResult result = null;
 

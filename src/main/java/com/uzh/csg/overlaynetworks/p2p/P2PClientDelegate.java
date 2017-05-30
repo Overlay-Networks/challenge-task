@@ -51,6 +51,17 @@ public interface P2PClientDelegate {
 	public void didSendMessage(P2PError error) throws MessageSendFailureException;
 
 	/**
+	 * Called once requested contact has been successfully discovered
+	 * returning PeerInfo object containing information about requested contact
+	 * or
+	 * there was an error and contact wasn't discovered due to not being present in DHT
+	 * or due to internal P2P error
+	 * @param peerInfo - contains information about discovered contact
+	 * @param error - contains information about the error such as error message
+	 */
+	public void didDiscoverContact(PeerInfo peerInfo, P2PError error);
+
+	/**
 	 * Called when online status is updated for a @contact
 	 * @param contact - contact for whom online status has updated
 	 * @param status - enum containing information about contact status

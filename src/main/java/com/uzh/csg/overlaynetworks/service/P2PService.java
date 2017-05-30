@@ -59,10 +59,9 @@ public class P2PService implements P2PClientDelegate {
 	 * returns a unique message ID
 	 * result is returned immediately (via REST)
 	 */
-	public MessageResult sendMessage(Message message) throws InterruptedException, ExecutionException {
+	public MessageResult sendMessage(Message message) throws InterruptedException, ExecutionException, MessageSendFailureException {
 		MessageService messageService = new MessageService();
 		MessageResult result = new MessageResult();
-		client.sendMessage(message, result);
 		if (message.getNotary()) {
 			messageService.writeToBlockchain(message, result.getMessageId());
 		}
@@ -130,6 +129,16 @@ public class P2PService implements P2PClientDelegate {
 		} else if (error != null) {
 			String errorMessage = error.getErrorMessage();
 			LOGGER.log(Level.INFO, "Error receiving ACK message: " + errorMessage);
+		}
+	}
+
+	@Override
+	public void didDiscoverContact(PeerInfo peerInfo, P2PError error) {
+		if(error != null) {
+			/* TODO react on error */
+			String errorMessage = error.getErrorMessage();
+		} else if (peerInfo != null) {
+			/* TODO store on front-end some of peer info  or just report that it was discovered */
 		}
 	}
 
