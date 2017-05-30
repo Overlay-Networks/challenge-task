@@ -18,8 +18,16 @@ The second part of this project is in a separate repository: [the bootstrapping 
 - Run the application by running `src/main/java/com/uzh/csg/overlaynetworks/Application.java` as a Java application.
 - Open `http://localhost:8080`
 
-## API Documentation
-- You can find the Swagger REST documentation on http://localhost:8080/swagger-ui.html
+## Interfaces between Web Front-End and Spring application
+- **REST**
+  - The communication from the Web Front-End to the Spring application runs over REST. This was decided because REST has a connection between a request and response (compared to WebSockets). E.g. a message sent to the Spring application can receive a message ID from the Spring application.
+  - You can find the Swagger REST documentation on http://localhost:8080/swagger-ui.html
+- **WebSockets**
+  - WebSockets are used to communicate from the Spring application to the Web Front-End. They are used, because they allow to immediately send data from the Spring application to the Web Front-End (without request)
+  - There are 3 interfaces with WebSockets:
+    - Send a message to the Web Front-End (message from another peer)
+    - Send the notary confirmation to the Web Front-End (notary via Ethereum)
+    - Update the contact online status in the Web Front-End.
 
 ## Smart Contract
 - The application accesses a smart contract on the Ethereum Test Network Ropsten(Revival). The contract written in solidity is located in the `Ethereum` folder.
