@@ -80,6 +80,9 @@ At periodic time intervals, user's contact list is sent to the back-end to check
 #### shutdown
 Once user closes the browser or clicks 'log out' button, P2PService calls 'shutdown()' method of P2PClient which removes peer credentials from DHT and announces shutdown in P2P system using announceShutdown().
 
+### Fault Tolerance
+To handle unstable nature of P2P communication, we use direct replication mechanism to replicate peer data in DHT. Each P2PClient uses JobScheduler to push an entry containing his information in DHT. JobScheduler pushes the contact's entry into the DHT every TTL/2 seconds (currently, it is 60/2 = 30 seconds). Not only it keeps data about the contact fresh, but also creates multiple replicas of the data, so even if node is goes down, the data can still be accessed.
+
 ### Bootstrapping Server
 We have separated a bootstrapping server into separate project since it has to be run separately and independently from the main application. In essence, bootstrapping server is an instance of PeerDHT object which automatically finds a free port and opens a sockets and starts.
 For P2PClient objects to be able to bootstrap successfully, bootstrapping server port and IP are hardcoded inside the class, so everytime bootstrapping server is restarted, constants inside P2PClient have to modified as well.
