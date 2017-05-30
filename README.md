@@ -19,8 +19,6 @@ The second part of this project is in a separate repository: [the bootstrapping 
 - Open `http://localhost:8080`
 
 ## Spring application & Web Front-End
-
-### How it works
 - There is a spring application for every client. This application provides a web front-end on port `:8080`.
 - The data of a user is stored in the local storage of the client in the browser (messages, contacts, username, etc.)
 - When the user authenticates (gives a username) a new session in the spring application is created. This session keeps the user data (contacts, username)
@@ -44,6 +42,9 @@ The second part of this project is in a separate repository: [the bootstrapping 
     - Send a message to the Web Front-End (message from another peer)
     - Send the notary confirmation to the Web Front-End (notary via Ethereum)
     - Update the contact online status in the Web Front-End.
+
+## P2P Communication
+// TODO @yuri
 
 ## Notary Service
 The notary service persists chosen messages using a smart contract into the Ethereum block chain.
