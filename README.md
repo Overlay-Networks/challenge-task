@@ -84,4 +84,7 @@ Wallets located within `wallet` already have funds so there's no need to provide
 The main smart contract called *MessageRegistry* can be instantiated using the *MessageRegistryHelper*.
 
 #### MessageService
-The MessageService is the main class used by the application. As the method names imply, it can either be checked if a message `isInBlockchain` or to it's possible to`writeToBlockchain`.  
+The MessageService is the main class used by the application. As the method names imply, it can either be checked if a message `isInBlockchain` or to it's possible to`writeToBlockchain`.
+
+# Presentation
+Have a look at [the presentation](http://slides.com/sebschrepfer/overlay-networks).
