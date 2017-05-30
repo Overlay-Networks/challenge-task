@@ -16,7 +16,7 @@ public final class MessageRegistryHelper {
      * @param messageRegistryAddress an optional address
      * @return A new instance of MessageRegistry
      */
-    
+
     public static MessageRegistry getMessageRegistry(Web3j web3j, String messageRegistryAddress) {
         final MessageRegistry messageRegistry = MessageRegistry.load(
                 messageRegistryAddress,

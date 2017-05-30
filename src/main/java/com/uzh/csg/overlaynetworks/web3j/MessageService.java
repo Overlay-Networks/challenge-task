@@ -31,7 +31,6 @@ public class MessageService extends Web3jService{
 	    	final BigInteger myBigInt = new BigInteger(myMessageId);
 	        final Uint256 myIdentifier = new Uint256(myBigInt);
 
-
 	 		final List<Type> message = messageRegistry.getMessage(myIdentifier).get();
 	 		if (message.isEmpty()) {
 	 			return false; }
