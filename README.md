@@ -19,11 +19,18 @@ The second part of this project is in a separate repository: [the bootstrapping 
 - Open `http://localhost:8080`
 
 ## Spring application & Web Front-End
+
+### How it works
 - There is a spring application for every client. This application provides a web front-end on port `:8080`.
 - The data of a user is stored in the local storage of the client in the browser (messages, contacts, username, etc.)
 - When the user authenticates (gives a username) a new session in the spring application is created. This session keeps the user data (contacts, username)
 - When the communication abrupts (websocket connection loss), the server deletes this session and logs out.
 - When a user revisits the website, all the stored data is loaded and the user is automatically logged in again (contacts, messages etc. are loaded).
+
+### Architecture
+- The spring application works as an intermediate between the web front-end and the smart contract and p2p.
+- The Web Front-End is running on Vue.js and Vue-resource for the REST communication. Stomp and Sock.js are used for the websocket communication of the Spring application. Sock.js is used for the communication and Stomp is a messaging protocol which allows to send JSON to the Web Front-End (directly from Spring Websocket).
+- The front-end dependencies were added as a Maven dependency for simplicity reasons: A second build process (e.g. with Webpack or Browserify) seemed like an unnecessary complicating factor. `mvn install` now injects all the dependencies accordingly.
 
 ### Communication (Interfaces)
 **REST**
@@ -32,6 +39,7 @@ The second part of this project is in a separate repository: [the bootstrapping 
 
 **WebSockets**
   - WebSockets are used to communicate from the Spring application to the Web Front-End. They are used, because they allow to immediately send data from the Spring application to the Web Front-End (without request)
+  - If the communication abrupts, a disconnect listener logs the user out.
   - There are 3 interfaces with WebSockets:
     - Send a message to the Web Front-End (message from another peer)
     - Send the notary confirmation to the Web Front-End (notary via Ethereum)
