@@ -14,7 +14,7 @@ public class P2PClientTestStart {
 
 	public static void main(String[] args) {
 		for(int i=0; i < NUM_CLIENTS; i++) {
-			P2PClient client = new P2PClient("peer_" + i);
+			P2PClient client = new P2PClient("peer" + i);
 			clients.add(client);
 		}
 		P2PClientTest p2pTest = new P2PClientTest(clients);

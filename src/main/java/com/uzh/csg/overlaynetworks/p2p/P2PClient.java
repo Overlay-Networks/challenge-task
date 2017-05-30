@@ -76,15 +76,15 @@ public class P2PClient {
 					if (request instanceof String) {
 						String payload = (String) request;
 						int notaryAndIDSeparatorIndex = payload.indexOf("_");
-						int idAndUsernameSeparatorIndex = payload.indexOf("_", notaryAndIDSeparatorIndex);
+						int idAndUsernameSeparatorIndex = payload.indexOf("_", notaryAndIDSeparatorIndex+1);
 						int usernameAndMessageSeparatorIndex = payload.lastIndexOf("_");
 						if (notaryAndIDSeparatorIndex > 0 && idAndUsernameSeparatorIndex > 0 && usernameAndMessageSeparatorIndex > 0) {
 							try {
 								String notary = payload.substring(0, notaryAndIDSeparatorIndex);
 								boolean isSigned = false;
-								if(notary == "0") {
+								if(notary.compareTo("0") == 0) {
 									isSigned = false;
-								} else if (notary == "1") {
+								} else if (notary.compareTo("1") == 0) {
 									isSigned = true;
 								} else {
 									if(delegate != null) {
@@ -343,30 +343,24 @@ public class P2PClient {
 						Data dataToStore = new Data(peerData);
 						dataToStore.ttlSeconds(USER_DATA_TTL);
 						PutBuilder userDataPut = peer.put(peerInfo.getUsernameKey()).data(dataToStore);
-						//FuturePut userDataPut = peer.put(peerInfo.getUsernameKey()).data(dataToStore).start();
-//						userDataPut.addListener(new BaseFutureAdapter<FuturePut>() {
-//
-//							@Override
-//							public void operationComplete(FuturePut future) throws Exception {
-//								if(future.isFailed()) {
-//									System.err.println("Failed to store user data in DHT! Reason is " + future.failedReason());
-//								} else if(future.isSuccess()) {
-//									System.out.println("STORED DATA FOR " + peerInfo.getUsername() + " under " + peerInfo.getUsernameKey().toString());
-//								}
-//							}
-//
-//						});
 						userDataUploader = new JobScheduler(peer.peer());
-						userDataUploader.start(userDataPut, (USER_DATA_TTL - 10) * 1000, -1, new AutomaticFuture() {
+						userDataUploader.start(userDataPut, (USER_DATA_TTL/2) * 1000, -1, new AutomaticFuture() {
 
 							@Override
 							public void futureCreated(BaseFuture future) {
-								if(future.isSuccess()) {
-									System.out.println("Added data to DHT for peer " + peerInfo.getUsername());
-								} else {
-									System.err.println("Failed adding data to DHT for peer " + peerInfo.getUsername() + "!");
-									System.err.println(future.failedReason());
-								}
+								future.addListener(new BaseFutureAdapter<FuturePut>() {
+
+									@Override
+									public void operationComplete(FuturePut future) throws Exception {
+										if(future.isSuccess()) {
+											System.out.println("Added data to DHT for peer " + peerInfo.getUsername());
+										} else {
+											System.err.println("Failed adding data to DHT for peer " + peerInfo.getUsername() + "!");
+											System.err.println(future.failedReason());
+										}
+									}
+
+								});
 							}
 
 						});

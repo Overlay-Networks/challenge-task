@@ -109,7 +109,6 @@ public class PeerInfo {
 					portBytes[i - secondSeparatorIndex - 1] = data[i];
 				}
 			}
-
 			this.peerAddress = new PeerAddress(peerAddressBytes);
 			try {
 				this.inetAddress = InetAddress.getByAddress(inetAdressBytes);

@@ -10,11 +10,13 @@ import com.uzh.csg.overlaynetworks.p2p.PeerInfo;
 import com.uzh.csg.overlaynetworks.p2p.error.P2PError;
 
 import javafx.util.Pair;
+import net.tomp2p.p2p.Peer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Created by yurybelevskiy on 27.05.17.
@@ -62,23 +64,20 @@ public class P2PClientTest implements P2PClientDelegate {
 		}
 	}
 
-	/* Send direct messages from every client to another client */
+	/* Send direct messages from every client to one random client */
 	private void sendDirectMessages() {
 		for(Pair<P2PClient, PeerState> sendingClient : clients) {
-			for(Pair<P2PClient, PeerState> receivingClient : clients) {
-				PeerInfo sendingClientInfo = sendingClient.getKey().getPeerInfo();
-				PeerInfo receivingClientInfo = receivingClient.getKey().getPeerInfo();
-				if (sendingClientInfo.getUsername().compareTo(receivingClientInfo.getUsername()) == 0) {
-					continue;
-				} else {
-					Message message = new Message();
-					message.setReceiver(new Contact(receivingClientInfo.getUsername()));
-					message.setMessage("Message with contents");
-					MessageResult result = new MessageResult();
-					receivingClient.getValue().messages.put(result.getMessageId(), new Pair<>(false, false));
-					sendingClient.getKey().sendMessage(message, result);
-				}
-			}
+			int randomIndex = ThreadLocalRandom.current().nextInt(0, clients.size()-1);
+			List<Pair<P2PClient, PeerState>> tmpClients = new ArrayList<>();
+			tmpClients.addAll(clients);
+			tmpClients.remove(sendingClient);
+			Pair<P2PClient, PeerState> receivingClient = tmpClients.get(randomIndex);
+			Message message = new Message();
+			message.setReceiver(new Contact(receivingClient.getKey().getPeerInfo().getUsername()));
+			message.setMessage("Message with contents");
+			MessageResult result = new MessageResult();
+			receivingClient.getValue().messages.put(result.getMessageId(), new Pair<>(false, false));
+			sendingClient.getKey().sendMessage(message, result);
 		}
 	}
 
