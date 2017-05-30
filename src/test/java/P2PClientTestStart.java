@@ -18,7 +18,7 @@ public class P2PClientTestStart {
 			clients.add(client);
 		}
 		P2PClientTest p2pTest = new P2PClientTest(clients);
-		p2pTest.bootstrapClients();
+		p2pTest.startTest();
 	}
 
 }
