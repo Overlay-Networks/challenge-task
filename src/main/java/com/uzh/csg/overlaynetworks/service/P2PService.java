@@ -1,9 +1,7 @@
 package com.uzh.csg.overlaynetworks.service;
 
-import static java.lang.Math.random;
-
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,6 +33,7 @@ public class P2PService implements P2PClientDelegate {
 	private P2PClient client;
 
 	private boolean updateContactIsRunning = false;
+	private List<ContactWithStatus> contactsWithStatuses = new ArrayList<>();
 
 	private static final Logger LOGGER = Logger.getLogger(P2PService.class.getName() );
 
@@ -43,24 +42,16 @@ public class P2PService implements P2PClientDelegate {
 	 * returns a contact list with status.
 	 * result is returned asynchronously via websockets
 	 */
-	@Scheduled(fixedDelay = 5000)
+	@Scheduled(fixedDelay = 30000)
 	public void updateOnlineStatusOfFriends() {
-		Set<ContactWithStatus> result = new HashSet<>();
-		if(!updateContactIsRunning && dataHolder.isAuthenticated() && dataHolder.getContacts().size() > 0) {
+		if(!updateContactIsRunning && dataHolder.isAuthenticated() && !dataHolder.getContacts().isEmpty()) {
 			updateContactIsRunning = true;
 
 			for(Contact contact : dataHolder.getContacts()) {
-				getStatusForContact(contact);
-				result.add(new ContactWithStatus(contact, getStatusForContact(contact)));
+				contactsWithStatuses.add(new ContactWithStatus(contact, ContactStatus.UNDETERMINED));
+				client.updateOnlineStatus(contact);
 			}
-			websocket.convertAndSend("/topic/update-contacts", result);
-			updateContactIsRunning = false;
 		}
-	}
-
-	private boolean getStatusForContact(Contact contact) {
-		client.updateOnlineStatus(contact);
-		return random() < 0.5;
 	}
 
 	/*
@@ -115,12 +106,6 @@ public class P2PService implements P2PClientDelegate {
 	}
 
 	/*
-	* receives message which are directed to this user.
-	* redirects the message to the socket controller (front-end).
-	* result is returned asynchronously via websockets
-	*/
-
-	/*
  	* receives message which are directed to this user.
  	* redirects the message to the socket controller (front-end).
  	* result is returned asynchronously via websockets
@@ -149,9 +134,19 @@ public class P2PService implements P2PClientDelegate {
 	}
 
 	@Override
-	public void didUpdateOnlineStatus(Contact contact, boolean isOnline, P2PError error) {
+	public void didUpdateOnlineStatus(Contact contact, ContactStatus status, P2PError error) {
 		if(contact != null) {
-			/* TODO  react on contact online status update */
+			for (ContactWithStatus contactWithStatus : contactsWithStatuses) {
+				if(contactWithStatus.getContact().getName().compareTo(contact.getName()) == 0) {
+					contactWithStatus.setStatus(status);
+					break;
+				}
+			}
+			if (allContactsStatusUpdated(contactsWithStatuses)) {
+				websocket.convertAndSend("/topic/update-contacts", contactsWithStatuses);
+				contactsWithStatuses.clear();
+				updateContactIsRunning = false;
+			}
 		} else if (error != null) {
 			String errorMessage = error.getErrorMessage();
 			LOGGER.log(Level.INFO, "Error receiving ACK message: " + errorMessage);
@@ -166,6 +161,23 @@ public class P2PService implements P2PClientDelegate {
 			String errorMessage = error.getErrorMessage();
 			LOGGER.log(Level.INFO, "Error shutting down the client: " + errorMessage);
 		}
+	}
+
+	/* Helper methods */
+
+	/**
+	 * Returns true if all contact have their status set
+	 * Otherwise, returns false
+	 * @param contactsWithStatuses
+	 * @return
+	 */
+	private boolean allContactsStatusUpdated(List<ContactWithStatus> contactsWithStatuses) {
+		for(ContactWithStatus contact : contactsWithStatuses) {
+			if(contact.getStatus() == ContactStatus.UNDETERMINED) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 }

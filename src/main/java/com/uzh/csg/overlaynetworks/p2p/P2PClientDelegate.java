@@ -1,6 +1,7 @@
 package com.uzh.csg.overlaynetworks.p2p;
 
 import com.uzh.csg.overlaynetworks.domain.dto.Contact;
+import com.uzh.csg.overlaynetworks.domain.dto.ContactStatus;
 import com.uzh.csg.overlaynetworks.domain.dto.Message;
 import com.uzh.csg.overlaynetworks.domain.dto.MessageResult;
 import com.uzh.csg.overlaynetworks.domain.exception.LoginFailedException;
@@ -52,10 +53,10 @@ public interface P2PClientDelegate {
 	/**
 	 * Called when online status is updated for a @contact
 	 * @param contact - contact for whom online status has updated
-	 * @param isOnline - indicates whether contact is online or offline
+	 * @param status - enum containing information about contact status
 	 * @param error - contains information about the error such as error message
 	 */
-	public void didUpdateOnlineStatus(Contact contact, boolean isOnline, P2PError error);
+	public void didUpdateOnlineStatus(Contact contact, ContactStatus status, P2PError error);
 
 	/**
 	 * Called when peer has been successfully shutted down or when error during shutdown occured.

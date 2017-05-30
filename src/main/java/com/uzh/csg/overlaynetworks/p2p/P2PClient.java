@@ -1,6 +1,7 @@
 package com.uzh.csg.overlaynetworks.p2p;
 
 import com.uzh.csg.overlaynetworks.domain.dto.Contact;
+import com.uzh.csg.overlaynetworks.domain.dto.ContactStatus;
 import com.uzh.csg.overlaynetworks.domain.dto.Message;
 import com.uzh.csg.overlaynetworks.domain.dto.MessageResult;
 import com.uzh.csg.overlaynetworks.domain.exception.LoginFailedException;
@@ -160,7 +161,7 @@ public class P2PClient {
 							String username = payload.substring(payload.indexOf("_") + 1, payload.length());
 							Contact contact = new Contact(username);
 							if (delegate != null) {
-								delegate.didUpdateOnlineStatus(contact, true, null);
+								delegate.didUpdateOnlineStatus(contact, ContactStatus.ONLINE, null);
 							}
 						}
 
@@ -272,7 +273,7 @@ public class P2PClient {
 								System.err.println("Failed to ping " + contact.getName() + " with direct message!");
 								System.err.println(future.failedReason());
 								if (delegate != null) {
-									delegate.didUpdateOnlineStatus(contact, false, null);
+									delegate.didUpdateOnlineStatus(contact, ContactStatus.OFFLINE, null);
 								}
 							}
 						}
@@ -280,7 +281,7 @@ public class P2PClient {
 					});
 				} else {
 					if (delegate != null) {
-						delegate.didUpdateOnlineStatus(contact, false, null);
+						delegate.didUpdateOnlineStatus(contact, ContactStatus.OFFLINE, null);
 					}
 				}
 			}

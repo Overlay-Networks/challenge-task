@@ -3,9 +3,9 @@ package com.uzh.csg.overlaynetworks.domain.dto;
 public class ContactWithStatus {
 
 	private Contact contact;
-	private boolean status;
+	private ContactStatus status;
 
-	public ContactWithStatus(Contact contact, boolean status) {
+	public ContactWithStatus(Contact contact, ContactStatus status) {
 		this.contact = contact;
 		this.status = status;
 	}
@@ -18,10 +18,10 @@ public class ContactWithStatus {
 		this.contact = contact;
 	}
 
-	public boolean isStatus() {
+	public ContactStatus getStatus() {
 		return status;
 	}
-	public void setStatus(boolean status) {
+	public void setStatus(ContactStatus status) {
 		this.status = status;
 	}
 
