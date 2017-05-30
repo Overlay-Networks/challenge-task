@@ -9,7 +9,6 @@ import com.uzh.csg.overlaynetworks.p2p.PeerInfo;
 import com.uzh.csg.overlaynetworks.p2p.error.P2PError;
 
 import javafx.util.Pair;
-import net.tomp2p.dht.PeerDHT;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -116,11 +115,6 @@ public class P2PClientTest implements P2PClientDelegate {
 			}
 
 			if(allClientsLoggedIn()) {
-				try {
-					Thread.sleep(10000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
 				sendDirectMessages();
 			}
 		}
@@ -158,7 +152,9 @@ public class P2PClientTest implements P2PClientDelegate {
 	}
 
 	public void didSendMessage(P2PError error) throws MessageSendFailureException {
-		System.err.println("Error sending P2P message! " + error.getErrorMessage());
+		if(error != null) {
+			System.err.println("Error sending P2P message! " + error.getErrorMessage());
+		}
 	}
 
 	public void didUpdateOnlineStatus(Contact contact, boolean isOnline, P2PError error) {

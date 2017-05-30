@@ -11,7 +11,6 @@ import com.uzh.csg.overlaynetworks.p2p.error.P2PShutdownError;
 import net.tomp2p.connection.Bindings;
 import net.tomp2p.dht.*;
 import net.tomp2p.futures.*;
-import net.tomp2p.p2p.AutomaticFuture;
 import net.tomp2p.p2p.JobScheduler;
 import net.tomp2p.p2p.PeerBuilder;
 import net.tomp2p.peers.Number160;
@@ -23,7 +22,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.UnknownHostException;
-import java.util.List;
 import java.util.Random;
 
 public class P2PClient {
@@ -40,7 +38,7 @@ public class P2PClient {
 
 	/* bootstrapping server IP and port are fixed constants */
 	private static final String BOOTSTRAP_ADDRESS = "127.0.0.1";
-	private static final int BOOTSTRAP_PORT = 37823;
+	private static final int BOOTSTRAP_PORT = 49689;
 
 	/* TTL for peer credentials */
 	private static final int USER_DATA_TTL = 60;
@@ -48,7 +46,7 @@ public class P2PClient {
 
 	public P2PClient(String username) {
 		this.peerInfo = new PeerInfo(username);
-		random = new Random(85L);
+		random = new Random(username.hashCode());
 	}
 
 	public PeerInfo getPeerInfo() {
@@ -66,6 +64,7 @@ public class P2PClient {
 
 			Bindings bindings = new Bindings().addAddress(address);
 			peer = new PeerBuilderDHT(new PeerBuilder(new Number160(random)).bindings(bindings).ports(port).start()).start();
+			System.out.println("Created peer with ID: " + peer.peerID().toString());
 
 			/* Specifies what to do when message is received */
 			peer.peer().objectDataReply(new ObjectDataReply() {
@@ -325,26 +324,8 @@ public class P2PClient {
 			bootstrap.addListener(new BaseFutureAdapter<FutureBootstrap>() {
 
 				public void operationComplete(FutureBootstrap future) throws Exception {
-					future.
 					if (future.isSuccess()) {
 						System.out.println("Successfully bootstrapped to server!");
-
-						Thread.sleep(5000);
-						System.out.println("--------------------------------------");
-						System.out.println("MY PEER MAP (VERIFIED)");
-						List<PeerAddress> peers = peer.peerBean().peerMap().all();
-						for(PeerAddress peerAddress : peers) {
-							System.out.println(peerAddress);
-						}
-						System.out.println("--------------------------------------");
-
-						System.out.println("--------------------------------------");
-						System.out.println("MY PEER MAP (UNVERIFIED)");
-						List<PeerAddress> peersUnverified = peer.peerBean().peerMap().allOverflow();
-						for(PeerAddress peerAddress : peersUnverified) {
-							System.out.println(peerAddress);
-						}
-						System.out.println("--------------------------------------");
 
 						byte[] peerData = peerInfo.toByteArray();
 						Data dataToStore = new Data(peerData);

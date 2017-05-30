@@ -96,13 +96,15 @@ public class PeerInfo {
 			throw new IllegalArgumentException("Input byte[] doesn't contain any separators!");
 		} else {
 			byte[] peerAddressBytes = new byte[firstSeparatorIndex];
-			byte[] inetAdressBytes = new byte[secondSeparatorIndex - firstSeparatorIndex];
-			byte[] portBytes = new byte[data.length - secondSeparatorIndex + 1];
+			byte[] inetAdressBytes = new byte[secondSeparatorIndex - firstSeparatorIndex - 1];
+			byte[] portBytes = new byte[data.length - secondSeparatorIndex - 1];
 			for (int i=0; i < data.length; i++) {
 				if(i < firstSeparatorIndex) {
 					peerAddressBytes[i] = data[i];
 				} else if (i > firstSeparatorIndex && i < secondSeparatorIndex) {
 					inetAdressBytes[i - firstSeparatorIndex - 1] = data[i];
+				} else if (i == firstSeparatorIndex || i == secondSeparatorIndex) {
+					continue;
 				} else {
 					portBytes[i - secondSeparatorIndex - 1] = data[i];
 				}
