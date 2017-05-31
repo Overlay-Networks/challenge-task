@@ -304,6 +304,19 @@ public class P2PClient {
 	 * Shutdowns peer 'nicely' announcing that in P2P system and removing credentials from DHT
 	 */
 	public void shutdown() {
+		FutureDone<Void> uploaderShutdown = userDataUploader.shutdown();
+		uploaderShutdown.addListener(new BaseFutureAdapter<FutureDone<Void>>() {
+
+			@Override
+			public void operationComplete(FutureDone<Void> future) throws Exception {
+				if(future.isSuccess()) {
+					System.out.println("Successfully shutted down recurrent user data uploader!");
+				} else {
+					System.err.println("Failed to shut down recurrent user data uploader! Error is " + future.failedReason());
+				}
+			}
+
+		});
 		FutureRemove removeData = peer.remove(peerInfo.getUsernameKey()).start();
 		removeData.addListener(new BaseFutureAdapter<FutureRemove>() {
 

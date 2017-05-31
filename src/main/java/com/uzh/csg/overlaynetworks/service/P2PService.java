@@ -161,7 +161,8 @@ public class P2PService implements P2PClientDelegate {
 	@Override
 	public void didShutdown(P2PError error) {
 		if (error == null) {
-			LOGGER.log(Level.INFO, "Successfully shutdown the client!z");
+			LOGGER.log(Level.INFO, "Successfully shutdown the client!");
+			client = null;
 		} else {
 			String errorMessage = error.getErrorMessage();
 			LOGGER.log(Level.INFO, "Error shutting down the client: " + errorMessage);
