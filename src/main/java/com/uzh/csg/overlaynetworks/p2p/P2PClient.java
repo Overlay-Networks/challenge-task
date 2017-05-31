@@ -59,7 +59,7 @@ public class P2PClient {
 	 * @throws LoginFailedException
 	 */
 	public void start() throws LoginFailedException {
-		try {
+		try { 
 			ServerSocket socket = new ServerSocket(0, 0, InetAddress.getByName("192.168.1.15"));
 			InetAddress address = socket.getInetAddress();
 			int port = socket.getLocalPort();
