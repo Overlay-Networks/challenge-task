@@ -58,30 +58,30 @@ For example, message sending process would look like:
 - P2PService, once received response, would send websocket response to the front-end.
 
 ### P2P Implementation
-As mentioned earlier, all P2P communication and interaction is done inside P2PClient class. Each instance of P2PClient class is associated with a single PeerDHT object. Below we will be discussing which functionality P2PClient is capable of providing and how does it achieve that.
+As mentioned earlier, all P2P communication and interaction is done inside P2PClient class. Each instance of P2PClient class is associated with a single PeerDHT object. Below we will be discussing which functionality P2PClient provides and how does it achieve that.
 
 #### start
 Once instance of P2P client has been created, start() method is called which performs following tasks:
 - Finds a free port and creates a socket
 - Performs a bootstrapping procedure to the dedicated bootstrapping server
 - Upon successful bootstrapping, stores client credentials such as username, IP address, port into the DHT
-- Declares and set's up routine how to handle to direct messages
+- Declares and set's up routine how to handle to direct messages using objectDataReply() TomP2P function
 
 #### sendMessage
-To send messages to other peers in P2P system, we use 'sendDirect' method offered by TomP2P framework.
+To send messages to other peers in P2P system, we use 'sendDirect()' method offered by TomP2P framework.
 Once we receive username of message receiver from the controller, we look up a DHT entry containing a key corresponding to the receiver's username which contains necessary information to reach receiver such as peer address, IP address and port.
 Each message is Data object which contains not only the actual message text, but also metadata that is mandatory on receiving side such as indicator whether message should be signed or not, message ID and sender username. One may argue that sender's username can be reverse-looked up in DHT using peer address, however, each DHT lookup is costly, so we have chosen to transmit username of the sender directly in the message.
 
-Once P2PClient receives message from another client, it responds with an ACK message to the sender and informs P2PService of new incoming message. 
+Once P2PClient receives message from another client, it responds with an ACK message to the sender and informs P2PService of new incoming message.
 
 #### updateContactOnlineStatus
-At periodic time intervals, user's contact list is sent to the back-end to check if they are online and offline and update their status correspondingly. To find out whether contact is online (i.e. his entry is present in DHT) or offline, we firstly check using FutureGet whether his credentials are in DHT. If the contact shutted down appropriately, he has cleared his entry into DHT, so we can easily determine the contact's status. To handle the case of inappropriate termination, contact's entry in DHT has a TTL. When contact is pushing his entry into the DHT, it sets a TTL on the Data object and contact, if online, keeps re-publising his data into DHT using JobScheduler. So even if contact exited system inapproriately, his entry would remain in DHT for longest of TTL, which is currently set to 60 seconds.
+At periodic time intervals, user's contact list is sent to the back-end to check if they are online/offline status and update status on front-end. To find out whether contact is online or offline, we firstly check using FutureGet whether clients credentials are stored in DHT. If the contact shutted down appropriately, he has cleared his entry into DHT, so we can easily determine the contact's status. To handle the case of inappropriate termination, contact's entry in DHT has a TTL. When contact is pushing his entry into the DHT, it sets a TTL on the Data object and contact, if online, keeps re-publising his data into DHT using JobScheduler. So even if contact exited system inapproriately, his entry would remain in DHT for longest of TTL, which is currently set to 60 seconds. To improve responsiveness of the method and to avoid waiting TTL seconds for a status update, if FutureGet successfully retrieved contact's info from DHT, we send ping message to the contact using FutureDirect and wait for acknowledgement in return. In this way, we can guaranteedly retrieve contact's online/offline status within reasonable time period (typically, no longer than 5 seconds).
 
 #### shutdown
-Once user closes the browser or clicks 'log out' button, P2PService calls 'shutdown()' method of P2PClient which removes peer credentials from DHT and announces shutdown in P2P system using announceShutdown().
+Once user closes the browser or clicks 'log out' button, P2PService calls 'shutdown()' method of P2PClient which removes peer credentials from DHT, announces shutdown in P2P system using announceShutdown() and calls shutdown() method on PeerDHT.
 
 ### Fault Tolerance
-To handle unstable nature of P2P communication, we use direct replication mechanism to replicate peer data in DHT. Each P2PClient uses JobScheduler to push an entry containing his information in DHT. JobScheduler pushes the contact's entry into the DHT every TTL/2 seconds (currently, it is 60/2 = 30 seconds). Not only it keeps data about the contact fresh, but also creates multiple replicas of the data, so even if node is goes down, the data can still be accessed.
+To handle unstable nature of P2P communication, we use direct replication mechanism to replicate peer data in DHT. Each P2PClient uses JobScheduler to push an entry containing his contact information into DHT. JobScheduler pushes the contact's entry into the DHT every TTL/6 seconds (currently, it is 60/6 = 10 seconds). Value of 10 seconds with TTL of 60 seconds has been picked through experimentation. For example, when using TTL/2 or TTL/3, FutureGet was failing to retrieve each DHT entry containing other peer's information. Reccurently pushing data into DHT does not only keeps contact's data fresh, but also creates multiple replicas of the data, so even if node is goes down, the data can still be accessed. 
 
 ### Bootstrapping Server
 We have separated a bootstrapping server into separate project since it has to be run separately and independently from the main application. In essence, bootstrapping server is an instance of PeerDHT object which automatically finds a free port and opens a sockets and starts.
