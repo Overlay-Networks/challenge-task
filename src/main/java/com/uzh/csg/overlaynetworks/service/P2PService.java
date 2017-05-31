@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 import com.uzh.csg.overlaynetworks.domain.dto.*;
 import com.uzh.csg.overlaynetworks.domain.exception.MessageSendFailureException;
 import com.uzh.csg.overlaynetworks.domain.exception.LoginFailedException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -20,6 +21,8 @@ import com.uzh.csg.overlaynetworks.p2p.P2PClientDelegate;
 import com.uzh.csg.overlaynetworks.p2p.PeerInfo;
 import com.uzh.csg.overlaynetworks.p2p.error.P2PError;
 import com.uzh.csg.overlaynetworks.web3j.MessageService;
+
+
 
 @Service
 public class P2PService implements P2PClientDelegate {
@@ -52,6 +55,7 @@ public class P2PService implements P2PClientDelegate {
 				client.updateOnlineStatus(contact);
 			}
 		}
+
 	}
 
 	/*
@@ -64,6 +68,7 @@ public class P2PService implements P2PClientDelegate {
 		MessageResult result = new MessageResult();
 		client.sendMessage(message, result);
 		if (message.getNotary()) {
+			System.out.println("[ETH]Initiating FUTURE transaction.");
 			messageService.writeToBlockchain(message, result.getMessageId());
 		}
 		return result;

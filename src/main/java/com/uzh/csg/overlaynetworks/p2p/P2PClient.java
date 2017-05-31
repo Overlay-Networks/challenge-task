@@ -36,8 +36,8 @@ public class P2PClient {
 	private JobScheduler userDataUploader;
 
 	/* bootstrapping server IP and port are fixed constants */
-	private static final String BOOTSTRAP_ADDRESS = "192.168.2.101";
-	private static final int BOOTSTRAP_PORT = 49599;
+	private static final String BOOTSTRAP_ADDRESS = "192.168.1.15";
+	private static final int BOOTSTRAP_PORT = 38989;
 
 	/* TTL for peer credentials */
 	private static final int USER_DATA_TTL = 60;
@@ -60,7 +60,7 @@ public class P2PClient {
 	 */
 	public void start() throws LoginFailedException {
 		try {
-			ServerSocket socket = new ServerSocket(0, 0, InetAddress.getByName("192.168.2.101"));
+			ServerSocket socket = new ServerSocket(0, 0, InetAddress.getByName("192.168.1.15"));
 			InetAddress address = socket.getInetAddress();
 			int port = socket.getLocalPort();
 
