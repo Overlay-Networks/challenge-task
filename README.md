@@ -92,15 +92,17 @@ The notary service persists chosen messages using a smart contract into the Ethe
 
 ### Smart Contract
 - The application accesses a smart contract on the Ethereum Test Network Ropsten(Revival). The contract written in solidity is located in the `Ethereum` folder as `MessageRegistry.sol`. Both the contract as a binary, as well as its interface are to be found in the same folder saved as `bin` and `abi` respectively. 
-  - The contract saves the sender's address, the receipients address (optional), the message to be saved and the timestamp of the block where the message is saved.
-    - Alternatively, a hash of the message could be saved into the blockchain instead of the message. In a second step this could be implemented or even in a separate application that handles a separate business case.
-  	- All of these informations are saved into a map separately. The identifier of the message is used to receive all information out of the maps. As solidity uses UInts, any normal integers need to be converted first. The same applies for the sender and receiver addreses, which are saved as type "address". This is done automatically in our application, but has to be considered if the contract should be accessed by another application.
+- The MessageRegistry can be found under the following address: `0xCDC2c9b31A414F8b7cd719C250ea6c650f18eb22`
+- The contracts method ´save´, saves the sender's address, the receipients address (optional), the message to be saved and the timestamp of the block where the message is saved. The identifier cannot be empty or used multiple times. Using this method spends Gas.
+  - Alternatively, a hash of the message could be saved into the blockchain instead of the message. In a second step this could be implemented or even in a separate application that handles a separate business case.
+  - All of these informations are saved into a map separately. The identifier of the message is used to receive all information out of the maps. As solidity uses UInts, any normal integers need to be converted first. The same applies for the sender and receiver addreses, which are saved as type "address". This is done automatically in our application, but has to be considered if the contract should be accessed by another application.
   - It is only possible to save one message per identifier, such that nobody can overwrite a message that has been saved. This assures that the message will be saved as long as the blockchain exists.
-  - The MessageRegistry can be found under the following address: `0xCDC2c9b31A414F8b7cd719C250ea6c650f18eb22`
-  - The MessageRegistry contains a function isDeployed() that is used to test whether the contract is reachable by an application. It simply returns true if it can be accessed.
-  - The smart contract was wrapped with the Web3j wrapper. The wrapped contract can be found under `com.uzh.csg.overlaynetworks.wrappers`. The `MessageRegistry.java` is used to access the contract on the blockchain and provides access to its functions. Do not change the automatically generated code.
+- The method ´getMessage´ with an identifier as parameter will return the previously stored information. Using this method does not spend Gas.
+- The MessageRegistry contains a function isDeployed() that is used to test whether the contract is reachable by an application. It simply returns true if it can be accessed. Using this method does not spend Gas.
+- The smart contract was wrapped with the Web3j wrapper. The wrapped contract can be found under `com.uzh.csg.overlaynetworks.wrappers`. The `MessageRegistry.java` is used to access the contract on the blockchain and provides access to its functions. Do not change the automatically generated code.
   - The Web3j wrapper is still included for the time being, such that a new contract could easily be deployed and wrapped.
-- The contract is deployed such that no one, not even the owner, can delete it from the blockchain. The same applies to any information saved in it. All information is public. *Do not send* any information to the blockchain that is private or could become problematic in the future.
+- The contract is deployed such that no one, not even the owner, can delete it from the blockchain. The same applies to any information saved in it. All information is public. ***Do not send*** any information to the blockchain that is private or could become problematic in the future.
+
 
 ### Web3j integration
 [Web3j](https://github.com/web3j/web3j) is integrated as a Maven dependency and as integration of everything related to Ethereum.
