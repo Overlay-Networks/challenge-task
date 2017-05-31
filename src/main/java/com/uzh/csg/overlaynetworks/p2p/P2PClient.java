@@ -36,8 +36,8 @@ public class P2PClient {
 	private JobScheduler userDataUploader;
 
 	/* bootstrapping server IP and port are fixed constants */
-	private static final String BOOTSTRAP_ADDRESS = "127.0.0.1";
-	private static final int BOOTSTRAP_PORT = 56479;
+	private static final String BOOTSTRAP_ADDRESS = "192.168.2.101";
+	private static final int BOOTSTRAP_PORT = 49599;
 
 	/* TTL for peer credentials */
 	private static final int USER_DATA_TTL = 60;
@@ -60,7 +60,7 @@ public class P2PClient {
 	 */
 	public void start() throws LoginFailedException {
 		try {
-			ServerSocket socket = new ServerSocket(0, 0, InetAddress.getByName(null));
+			ServerSocket socket = new ServerSocket(0, 0, InetAddress.getByName(BOOTSTRAP_ADDRESS));
 			InetAddress address = socket.getInetAddress();
 			int port = socket.getLocalPort();
 
@@ -241,38 +241,6 @@ public class P2PClient {
 	}
 
 	/**
-	 * Checks whether given contact is currently present in DHT
-	 * Upon completion, corresponding delegate method is called
-	 * @param contact
-	 */
-	public void discoverContact(Contact contact) {
-		PeerInfo contactInfo = new PeerInfo(contact.getName());
-		FutureGet getContact = peer.get(contactInfo.getUsernameKey()).start();
-		getContact.addListener(new BaseFutureAdapter<FutureGet>() {
-
-			@Override
-			public void operationComplete(FutureGet future) throws Exception {
-				if(future.isSuccess() && future.data() != null) {
-					if (delegate != null) {
-						PeerInfo receivedInfo = new PeerInfo(future.data().toBytes());
-						delegate.didDiscoverContact(receivedInfo, null);
-					}
-				} else if (future.isCompleted()) {
-					if (delegate != null) {
-						delegate.didDiscoverContact(null, P2PDiscoverContactError.CONTACT_NOT_PRESENT);
-					}
-				} else {
-					System.err.println("Contact discovery failed: " + future.failedReason());
-					if (delegate != null) {
-						delegate.didDiscoverContact(null, P2PDiscoverContactError.DISCOVERY_ERROR);
-					}
-				}
-			}
-
-		});
-	}
-
-	/**
 	 * Checks whether given contact is online or not
 	 * First, checks whether peer info is present in DHT. If it is present, peer isn't necessarily online.
 	 * Hence, it tries to ping it with direct message.
@@ -378,7 +346,7 @@ public class P2PClient {
 						dataToStore.ttlSeconds(USER_DATA_TTL);
 						PutBuilder userDataPut = peer.put(peerInfo.getUsernameKey()).data(dataToStore);
 						userDataUploader = new JobScheduler(peer.peer());
-						userDataUploader.start(userDataPut, (USER_DATA_TTL/2) * 1000, -1, new AutomaticFuture() {
+						userDataUploader.start(userDataPut, (USER_DATA_TTL/3) * 1000, -1, new AutomaticFuture() {
 
 							@Override
 							public void futureCreated(BaseFuture future) {

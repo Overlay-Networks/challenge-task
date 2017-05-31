@@ -141,10 +141,6 @@ public class P2PClientTest implements P2PClientDelegate {
 		}
 	}
 
-	public void didDiscoverContact(PeerInfo contactInfo, P2PError error) {
-
-	}
-
 	public void didUpdateOnlineStatus(Contact contact, boolean isOnline, P2PError error) {
 
 	}

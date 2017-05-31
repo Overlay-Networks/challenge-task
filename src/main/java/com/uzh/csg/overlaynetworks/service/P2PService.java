@@ -42,7 +42,7 @@ public class P2PService implements P2PClientDelegate {
 	 * returns a contact list with status.
 	 * result is returned asynchronously via websockets
 	 */
-	@Scheduled(fixedDelay = 30000)
+	@Scheduled(fixedDelay = 5000)
 	public void updateOnlineStatusOfFriends() {
 		if(!updateContactIsRunning && dataHolder.isAuthenticated() && !dataHolder.getContacts().isEmpty()) {
 			updateContactIsRunning = true;
@@ -130,16 +130,6 @@ public class P2PService implements P2PClientDelegate {
 		} else if (error != null) {
 			String errorMessage = error.getErrorMessage();
 			LOGGER.log(Level.INFO, "Error receiving ACK message: " + errorMessage);
-		}
-	}
-
-	@Override
-	public void didDiscoverContact(PeerInfo peerInfo, P2PError error) {
-		if(error != null) {
-			/* TODO react on error */
-			String errorMessage = error.getErrorMessage();
-		} else if (peerInfo != null) {
-			/* TODO store on front-end some of peer info  or just report that it was discovered */
 		}
 	}
 
