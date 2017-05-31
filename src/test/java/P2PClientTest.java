@@ -1,5 +1,4 @@
 import com.uzh.csg.overlaynetworks.domain.dto.Contact;
-import com.uzh.csg.overlaynetworks.domain.dto.ContactStatus;
 import com.uzh.csg.overlaynetworks.domain.dto.Message;
 import com.uzh.csg.overlaynetworks.domain.dto.MessageResult;
 import com.uzh.csg.overlaynetworks.domain.exception.LoginFailedException;
@@ -146,7 +145,7 @@ public class P2PClientTest implements P2PClientDelegate {
 
 	}
 
-	public void didUpdateOnlineStatus(Contact contact, ContactStatus status, P2PError error) {
+	public void didUpdateOnlineStatus(Contact contact, boolean isOnline, P2PError error) {
 
 	}
 

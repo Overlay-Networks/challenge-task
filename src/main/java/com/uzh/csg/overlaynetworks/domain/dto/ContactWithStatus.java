@@ -3,11 +3,11 @@ package com.uzh.csg.overlaynetworks.domain.dto;
 public class ContactWithStatus {
 
 	private Contact contact;
-	private ContactStatus status;
+	private boolean isOnline;
 
-	public ContactWithStatus(Contact contact, ContactStatus status) {
+	public ContactWithStatus(Contact contact, boolean isOnline) {
 		this.contact = contact;
-		this.status = status;
+		this.isOnline = isOnline;
 	}
 	public ContactWithStatus() { }
 
@@ -18,16 +18,16 @@ public class ContactWithStatus {
 		this.contact = contact;
 	}
 
-	public ContactStatus getStatus() {
-		return status;
+	public boolean getStatus() {
+		return isOnline;
 	}
-	public void setStatus(ContactStatus status) {
-		this.status = status;
+	public void setStatus(boolean isOnline) {
+		this.isOnline = isOnline;
 	}
 
 	@Override
 	public String toString() {
-		return "ContactWithStatusDTO{contact:"+contact+",status:"+status+"}";
+		return "ContactWithStatusDTO{contact:"+contact+",status:"+isOnline+"}";
 	}
 
 }

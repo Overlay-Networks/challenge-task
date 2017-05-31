@@ -1,7 +1,6 @@
 package com.uzh.csg.overlaynetworks.p2p;
 
 import com.uzh.csg.overlaynetworks.domain.dto.Contact;
-import com.uzh.csg.overlaynetworks.domain.dto.ContactStatus;
 import com.uzh.csg.overlaynetworks.domain.dto.Message;
 import com.uzh.csg.overlaynetworks.domain.dto.MessageResult;
 import com.uzh.csg.overlaynetworks.domain.exception.LoginFailedException;
@@ -38,7 +37,7 @@ public class P2PClient {
 
 	/* bootstrapping server IP and port are fixed constants */
 	private static final String BOOTSTRAP_ADDRESS = "127.0.0.1";
-	private static final int BOOTSTRAP_PORT = 50518;
+	private static final int BOOTSTRAP_PORT = 56479;
 
 	/* TTL for peer credentials */
 	private static final int USER_DATA_TTL = 60;
@@ -281,23 +280,19 @@ public class P2PClient {
 	 * @param contact
 	 */
 	public void updateOnlineStatus(Contact contact) {
-		Number160 userKey = new Number160(contact.getName().hashCode());
-		FutureGet retrieveUser = peer.get(userKey).start();
+		PeerInfo contactInfo = new PeerInfo(contact.getName());
+		FutureGet retrieveUser = peer.get(contactInfo.getUsernameKey()).start();
 		retrieveUser.addListener(new BaseFutureAdapter<FutureGet>() {
 
 			@Override
 			public void operationComplete(FutureGet future) throws Exception {
 				if(future.isSuccess() && future.data() != null) {
 					if (delegate != null) {
-						delegate.didUpdateOnlineStatus(contact, ContactStatus.ONLINE, null);
-					}
-				} else if (future.isCompleted()) {
-					if (delegate != null) {
-						delegate.didUpdateOnlineStatus(contact, ContactStatus.OFFLINE, null);
+						delegate.didUpdateOnlineStatus(contact, true, null);
 					}
 				} else {
 					if (delegate != null) {
-						delegate.didUpdateOnlineStatus(contact, ContactStatus.UNDETERMINED, null);
+						delegate.didUpdateOnlineStatus(contact, false, null);
 					}
 				}
 			}

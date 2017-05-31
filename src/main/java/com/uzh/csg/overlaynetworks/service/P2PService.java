@@ -1,7 +1,7 @@
 package com.uzh.csg.overlaynetworks.service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,7 +33,7 @@ public class P2PService implements P2PClientDelegate {
 	private P2PClient client;
 
 	private boolean updateContactIsRunning = false;
-	private List<ContactWithStatus> contactsWithStatuses = new ArrayList<>();
+	private Set<ContactWithStatus> contactsWithStatuses = new HashSet<>();
 
 	private static final Logger LOGGER = Logger.getLogger(P2PService.class.getName() );
 
@@ -48,7 +48,7 @@ public class P2PService implements P2PClientDelegate {
 			updateContactIsRunning = true;
 
 			for(Contact contact : dataHolder.getContacts()) {
-				contactsWithStatuses.add(new ContactWithStatus(contact, ContactStatus.UNDETERMINED));
+				//contactsWithStatuses.add(new ContactWithStatus(contact, false));
 				client.updateOnlineStatus(contact);
 			}
 		}
@@ -62,6 +62,7 @@ public class P2PService implements P2PClientDelegate {
 	public MessageResult sendMessage(Message message) throws InterruptedException, ExecutionException, MessageSendFailureException {
 		MessageService messageService = new MessageService();
 		MessageResult result = new MessageResult();
+		client.sendMessage(message, result);
 		if (message.getNotary()) {
 			messageService.writeToBlockchain(message, result.getMessageId());
 		}
@@ -143,14 +144,9 @@ public class P2PService implements P2PClientDelegate {
 	}
 
 	@Override
-	public void didUpdateOnlineStatus(Contact contact, ContactStatus status, P2PError error) {
+	public void didUpdateOnlineStatus(Contact contact, boolean isOnline, P2PError error) {
 		if(contact != null) {
-			for (ContactWithStatus contactWithStatus : contactsWithStatuses) {
-				if(contactWithStatus.getContact().getName().compareTo(contact.getName()) == 0) {
-					contactWithStatus.setStatus(status);
-					break;
-				}
-			}
+			contactsWithStatuses.add(new ContactWithStatus(contact, isOnline));
 			if (allContactsStatusUpdated(contactsWithStatuses)) {
 				websocket.convertAndSend("/topic/update-contacts", contactsWithStatuses);
 				contactsWithStatuses.clear();
@@ -180,13 +176,8 @@ public class P2PService implements P2PClientDelegate {
 	 * @param contactsWithStatuses
 	 * @return
 	 */
-	private boolean allContactsStatusUpdated(List<ContactWithStatus> contactsWithStatuses) {
-		for(ContactWithStatus contact : contactsWithStatuses) {
-			if(contact.getStatus() == ContactStatus.UNDETERMINED) {
-				return false;
-			}
-		}
-		return true;
+	private boolean allContactsStatusUpdated(Set<ContactWithStatus> contactsWithStatuses) {
+		return contactsWithStatuses.size() == dataHolder.getContacts().size();
 	}
 
 }
