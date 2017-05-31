@@ -42,7 +42,7 @@ public class P2PService implements P2PClientDelegate {
 	 * returns a contact list with status.
 	 * result is returned asynchronously via websockets
 	 */
-	@Scheduled(fixedDelay = 5000)
+	@Scheduled(fixedDelay = 10000)
 	public void updateOnlineStatusOfFriends() {
 		if(!updateContactIsRunning && dataHolder.isAuthenticated() && !dataHolder.getContacts().isEmpty()) {
 			updateContactIsRunning = true;

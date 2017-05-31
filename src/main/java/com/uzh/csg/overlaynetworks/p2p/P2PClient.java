@@ -60,7 +60,7 @@ public class P2PClient {
 	 */
 	public void start() throws LoginFailedException {
 		try {
-			ServerSocket socket = new ServerSocket(0, 0, InetAddress.getByName(BOOTSTRAP_ADDRESS));
+			ServerSocket socket = new ServerSocket(0, 0, InetAddress.getByName("192.168.2.101"));
 			InetAddress address = socket.getInetAddress();
 			int port = socket.getLocalPort();
 
@@ -146,6 +146,27 @@ public class P2PClient {
 								if (delegate != null) {
 									delegate.didReceiveAck(null, P2PReceiveMessageError.INVALID_MESSAGE_FORMAT);
 								}
+							}
+						} else if(payload.compareTo("ping") == 0) {
+							FutureDirect pingACKMessage = peer.peer().sendDirect(sender).object("pingACK_" + peerInfo.getUsername()).start();
+							pingACKMessage.addListener(new BaseFutureAdapter<FutureDirect>() {
+
+								@Override
+								public void operationComplete(FutureDirect future) throws Exception {
+									if (future.isFailed()) {
+										System.err.println("Failed to send ping ACK!");
+										System.err.println("Reason is: " + future.failedReason());
+									} else {
+										System.out.println("Successfully sent ping ACK message!");
+									}
+								}
+
+							});
+						} else if(payload.startsWith("pingACK_")) {
+							String username = payload.substring(payload.indexOf("_") + 1, payload.length());
+							Contact contact = new Contact(username);
+							if (delegate != null) {
+								delegate.didUpdateOnlineStatus(contact, true, null);
 							}
 						} else {
 							if (delegate != null) {
@@ -255,8 +276,28 @@ public class P2PClient {
 			@Override
 			public void operationComplete(FutureGet future) throws Exception {
 				if(future.isSuccess() && future.data() != null) {
-					if (delegate != null) {
-						delegate.didUpdateOnlineStatus(contact, true, null);
+					PeerInfo contactInfo = new PeerInfo(future.data().toBytes());
+					if(contactInfo != null) {
+						FutureDirect pingMessage = peer.peer().sendDirect(contactInfo.getPeerAddress()).object("ping").start();
+						pingMessage.addListener(new BaseFutureAdapter<FutureDirect>() {
+
+							@Override
+							public void operationComplete(FutureDirect future) throws Exception {
+								if(future.isCompleted() && future.isFailed()) {
+									System.err.println("Failed to send direct ping message: " + future.isFailed());
+									if(delegate != null) {
+										delegate.didUpdateOnlineStatus(contact, false, null);
+									}
+								} else if (future.isSuccess()) {
+									System.out.println("Successfully sent ping message!");
+								}
+							}
+
+						});
+					} else {
+						if (delegate != null) {
+							delegate.didUpdateOnlineStatus(contact, false, null);
+						}
 					}
 				} else {
 					if (delegate != null) {
@@ -346,7 +387,7 @@ public class P2PClient {
 						dataToStore.ttlSeconds(USER_DATA_TTL);
 						PutBuilder userDataPut = peer.put(peerInfo.getUsernameKey()).data(dataToStore);
 						userDataUploader = new JobScheduler(peer.peer());
-						userDataUploader.start(userDataPut, (USER_DATA_TTL/3) * 1000, -1, new AutomaticFuture() {
+						userDataUploader.start(userDataPut, (USER_DATA_TTL/6) * 1000, -1, new AutomaticFuture() {
 
 							@Override
 							public void futureCreated(BaseFuture future) {
