@@ -5,11 +5,13 @@ public class ReceiveMessage {
 	private Contact sender;
 	private String message;
 	private long messageId;
+	private boolean notary;
 
-	public ReceiveMessage(Contact sender, String message, long messageId) {
+	public ReceiveMessage(Contact sender, String message, long messageId, boolean notary) {
 		this.sender = sender;
 		this.message = message;
 		this.messageId = messageId;
+		this.notary = notary;
 	}
 	public ReceiveMessage() { }
 
@@ -37,9 +39,17 @@ public class ReceiveMessage {
 		this.messageId = messageId;
 	}
 
+	public boolean getNotary() {
+		return notary;
+	}
+
+	public void setNotary(boolean notary) {
+		this.notary = notary;
+	}
+
 	@Override
 	public String toString() {
-		return "ReceiveMessageDTO{sender:"+sender+",message:"+message+",messageId:"+messageId+"}";
+		return "ReceiveMessageDTO{sender:"+sender+",message:"+message+",messageId:"+messageId+",notary:"+notary+"}";
 	}
 
 }

@@ -19,7 +19,7 @@ public class ReceiveNotary {
 
 	@Override
 	public String toString() {
-		return "ReceiveSignDTO{messageId:"+messageId+"}";
+		return "ReceiveNotary{messageId:"+messageId+"}";
 	}
 
 }

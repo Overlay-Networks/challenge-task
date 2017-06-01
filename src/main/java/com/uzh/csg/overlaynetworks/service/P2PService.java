@@ -121,6 +121,7 @@ public class P2PService implements P2PClientDelegate {
 			ReceiveMessage receiveMessage = new ReceiveMessage();
 			receiveMessage.setMessage(message.getMessage());
 			receiveMessage.setSender(from);
+			receiveMessage.setNotary(message.getNotary());
 			websocket.convertAndSend("/topic/receive-message", receiveMessage);
 			if (message.getNotary()) {
 				
