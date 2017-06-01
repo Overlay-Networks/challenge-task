@@ -36,7 +36,7 @@ public class MessageService extends Web3jService{
 
 	 		final List<Type> message = messageRegistry.getMessage(myIdentifier).get();
 
-	 		if (message.isEmpty()) {
+	 		if (message.size() != 4) {
 	 			return false; }
 	 		else {
 	 			return true;
