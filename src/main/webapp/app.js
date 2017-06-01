@@ -71,7 +71,7 @@ new Vue({
 							messageId: response.messageId,
 							content: response.message,
 							isOwnMessage: false,
-							notary: false,
+							notary: response.notary,
 							approved: false
 						});
 						setToStorage(App);
