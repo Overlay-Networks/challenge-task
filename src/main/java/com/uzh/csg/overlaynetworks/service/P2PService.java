@@ -11,6 +11,7 @@ import com.uzh.csg.overlaynetworks.domain.exception.MessageSendFailureException;
 import com.uzh.csg.overlaynetworks.domain.exception.LoginFailedException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -34,7 +35,8 @@ public class P2PService implements P2PClientDelegate {
 	private SimpMessagingTemplate websocket;
 
 	private P2PClient client;
-
+	private MessageService messageService = new MessageService();
+	
 	private boolean updateContactIsRunning = false;
 	private Set<ContactWithStatus> contactsWithStatuses = new HashSet<>();
 
@@ -64,7 +66,7 @@ public class P2PService implements P2PClientDelegate {
 	 * result is returned immediately (via REST)
 	 */
 	public MessageResult sendMessage(Message message) throws InterruptedException, ExecutionException, MessageSendFailureException {
-		MessageService messageService = new MessageService();
+		
 		MessageResult result = new MessageResult();
 		client.sendMessage(message, result);
 		if (message.getNotary()) {
@@ -123,13 +125,29 @@ public class P2PService implements P2PClientDelegate {
 			receiveMessage.setSender(from);
 			websocket.convertAndSend("/topic/receive-message", receiveMessage);
 			if (message.getNotary()) {
-				
+				try {
+					if(messageService.isInBlockchain(result.getMessageId())) {
+						Thread.sleep(30000);
+						websocket.convertAndSend("/topic/receive-notary");
+					}
+				} catch (MessagingException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ExecutionException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		} else if (error != null) {
 			String errorMessage = error.getErrorMessage();
 			LOGGER.log(Level.INFO, "Error receiving message: " + errorMessage);
 		}
 	}
+	
+
 
 	@Override
 	public void didReceiveAck(MessageResult result, P2PError error) {
