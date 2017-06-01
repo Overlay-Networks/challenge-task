@@ -6,17 +6,19 @@ import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.uzh.csg.overlaynetworks.domain.dto.*;
-import com.uzh.csg.overlaynetworks.domain.exception.MessageSendFailureException;
-import com.uzh.csg.overlaynetworks.domain.exception.LoginFailedException;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.uzh.csg.overlaynetworks.domain.DataHolder;
+import com.uzh.csg.overlaynetworks.domain.dto.Contact;
+import com.uzh.csg.overlaynetworks.domain.dto.ContactWithStatus;
+import com.uzh.csg.overlaynetworks.domain.dto.Message;
+import com.uzh.csg.overlaynetworks.domain.dto.MessageResult;
+import com.uzh.csg.overlaynetworks.domain.dto.ReceiveMessage;
+import com.uzh.csg.overlaynetworks.domain.exception.LoginFailedException;
+import com.uzh.csg.overlaynetworks.domain.exception.MessageSendFailureException;
 import com.uzh.csg.overlaynetworks.p2p.P2PClient;
 import com.uzh.csg.overlaynetworks.p2p.P2PClientDelegate;
 import com.uzh.csg.overlaynetworks.p2p.PeerInfo;
@@ -34,9 +36,12 @@ public class P2PService implements P2PClientDelegate {
 	@Autowired
 	private SimpMessagingTemplate websocket;
 
+	@Autowired
+	private EtherService etherService;
+
 	private P2PClient client;
 	private MessageService messageService = new MessageService();
-	
+
 	private boolean updateContactIsRunning = false;
 	private Set<ContactWithStatus> contactsWithStatuses = new HashSet<>();
 
@@ -66,7 +71,7 @@ public class P2PService implements P2PClientDelegate {
 	 * result is returned immediately (via REST)
 	 */
 	public MessageResult sendMessage(Message message) throws InterruptedException, ExecutionException, MessageSendFailureException {
-		
+
 		MessageResult result = new MessageResult();
 		client.sendMessage(message, result);
 		if (message.getNotary()) {
@@ -118,7 +123,7 @@ public class P2PService implements P2PClientDelegate {
  	* result is returned asynchronously via websockets
  	*/
 	@Override
-	public void didReceiveMessage(Message message, Contact from, MessageResult result, P2PError error) {
+	public void didReceiveMessage(Message message, Contact from, MessageResult result, P2PError error) throws Exception {
 		if (message != null && result != null) {
 			ReceiveMessage receiveMessage = new ReceiveMessage();
 			receiveMessage.setMessage(message.getMessage());
@@ -126,29 +131,13 @@ public class P2PService implements P2PClientDelegate {
 			receiveMessage.setNotary(message.getNotary());
 			websocket.convertAndSend("/topic/receive-message", receiveMessage);
 			if (message.getNotary()) {
-				try {
-					if(messageService.isInBlockchain(result.getMessageId())) {
-						Thread.sleep(30000);
-						websocket.convertAndSend("/topic/receive-notary");
-					}
-				} catch (MessagingException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (ExecutionException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				etherService.checkIfMessageIsInBlockChain(result.getMessageId());
 			}
 		} else if (error != null) {
 			String errorMessage = error.getErrorMessage();
 			LOGGER.log(Level.INFO, "Error receiving message: " + errorMessage);
 		}
 	}
-	
-
 
 	@Override
 	public void didReceiveAck(MessageResult result, P2PError error) {

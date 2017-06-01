@@ -1,5 +1,9 @@
 package com.uzh.csg.overlaynetworks.p2p;
 
+import java.util.concurrent.ExecutionException;
+
+import org.springframework.messaging.MessagingException;
+
 import com.uzh.csg.overlaynetworks.domain.dto.Contact;
 import com.uzh.csg.overlaynetworks.domain.dto.Message;
 import com.uzh.csg.overlaynetworks.domain.dto.MessageResult;
@@ -31,7 +35,7 @@ public interface P2PClientDelegate {
 	 * @param from - Contact object containing username of message sender (can be retrieved using from.getName())
 	 * @param error - contains information about the error such as error message
 	 */
-	public void didReceiveMessage(Message message, Contact from, MessageResult result, P2PError error);
+	public void didReceiveMessage(Message message, Contact from, MessageResult result, P2PError error) throws Exception;
 
 	/**
 	 * Called when acknowledgement of message receive has been received from message-receiving party or there was an error during receive.
