@@ -1,14 +1,33 @@
 package com.uzh.csg.overlaynetworks.p2p;
 
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.UnknownHostException;
+import java.util.Random;
+
 import com.uzh.csg.overlaynetworks.domain.dto.Contact;
 import com.uzh.csg.overlaynetworks.domain.dto.Message;
 import com.uzh.csg.overlaynetworks.domain.dto.MessageResult;
 import com.uzh.csg.overlaynetworks.domain.exception.LoginFailedException;
 import com.uzh.csg.overlaynetworks.domain.exception.MessageSendFailureException;
-import com.uzh.csg.overlaynetworks.p2p.error.*;
+import com.uzh.csg.overlaynetworks.p2p.error.P2PLoginError;
+import com.uzh.csg.overlaynetworks.p2p.error.P2PReceiveMessageError;
+import com.uzh.csg.overlaynetworks.p2p.error.P2PSendMessageError;
+import com.uzh.csg.overlaynetworks.p2p.error.P2PShutdownError;
+
 import net.tomp2p.connection.Bindings;
-import net.tomp2p.dht.*;
-import net.tomp2p.futures.*;
+import net.tomp2p.dht.FutureGet;
+import net.tomp2p.dht.FuturePut;
+import net.tomp2p.dht.FutureRemove;
+import net.tomp2p.dht.PeerBuilderDHT;
+import net.tomp2p.dht.PeerDHT;
+import net.tomp2p.dht.PutBuilder;
+import net.tomp2p.futures.BaseFuture;
+import net.tomp2p.futures.BaseFutureAdapter;
+import net.tomp2p.futures.FutureBootstrap;
+import net.tomp2p.futures.FutureDirect;
+import net.tomp2p.futures.FutureDone;
 import net.tomp2p.p2p.AutomaticFuture;
 import net.tomp2p.p2p.JobScheduler;
 import net.tomp2p.p2p.PeerBuilder;
@@ -16,12 +35,6 @@ import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.rpc.ObjectDataReply;
 import net.tomp2p.storage.Data;
-
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.UnknownHostException;
-import java.util.Random;
 
 public class P2PClient {
 
@@ -60,7 +73,7 @@ public class P2PClient {
 	 */
 	public void start() throws LoginFailedException {
 		try {
-			ServerSocket socket = new ServerSocket(0, 0, InetAddress.getByName("192.168.1.163"));
+			ServerSocket socket = new ServerSocket(0, 0, InetAddress.getByName("192.168.1.122"));
 			InetAddress address = socket.getInetAddress();
 			int port = socket.getLocalPort();
 
@@ -215,6 +228,7 @@ public class P2PClient {
 		String messageToSend = (message.getNotary() ? "1" : "0") + "_" + result.getMessageId() + "_" +  peerInfo.getUsername() + "_" + message.getMessage();
 		getIPAddress.addListener(new BaseFutureAdapter<FutureGet>() {
 
+			@Override
 			public void operationComplete(FutureGet future) throws Exception {
 				if (future.isSuccess() && future.data() != null) {
 					try {
@@ -378,6 +392,7 @@ public class P2PClient {
 			FutureBootstrap bootstrap = peer.peer().bootstrap().inetAddress(bootstrapAddress).ports(BOOTSTRAP_PORT).start();
 			bootstrap.addListener(new BaseFutureAdapter<FutureBootstrap>() {
 
+				@Override
 				public void operationComplete(FutureBootstrap future) throws Exception {
 					if (future.isSuccess()) {
 						System.out.println("Successfully bootstrapped to server!");

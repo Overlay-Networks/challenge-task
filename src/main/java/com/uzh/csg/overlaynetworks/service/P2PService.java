@@ -2,7 +2,6 @@ package com.uzh.csg.overlaynetworks.service;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -70,13 +69,14 @@ public class P2PService implements P2PClientDelegate {
 	 * returns a unique message ID
 	 * result is returned immediately (via REST)
 	 */
-	public MessageResult sendMessage(Message message) throws InterruptedException, ExecutionException, MessageSendFailureException {
+	public MessageResult sendMessage(Message message) throws Exception {
 
 		MessageResult result = new MessageResult();
 		client.sendMessage(message, result);
 		if (message.getNotary()) {
 			System.out.println("[ETH]Initiating FUTURE transaction.");
 			messageService.writeToBlockchain(message, result.getMessageId(),websocket);
+			etherService.checkIfMessageIsInBlockChain(result.getMessageId());
 		}
 		return result;
 	}
