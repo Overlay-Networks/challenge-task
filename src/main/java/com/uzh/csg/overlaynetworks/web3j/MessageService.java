@@ -64,19 +64,21 @@ public class MessageService extends Web3jService{
 			final Uint256 identifier = new Uint256(myBigInt);
 			final Utf8String MyMessage = new Utf8String(message.getMessage());
 			final Address receiver = new Address("0x5BbB245A661C4C112AA0e848A2BB007Ba3e9B628");
-			
-			
+
+
 			System.out.println("[ETH]Initiating transaction.");
 			System.out.println("[ETH] Message ID: " + idString);
-			
+
 			final Future <TransactionReceipt> saveToBlockchain = messageRegistry.save(MyMessage, receiver, identifier);
-			ReceiveNotary notary = new ReceiveNotary();
-			final TransactionReceipt transactionReceipt = saveToBlockchain.get();
-			
-			if (!transactionReceipt.getTransactionHash().isEmpty()) {
-				notary.setMessageId(messageId);
-				websocket.convertAndSend("/topic/receive-notary", notary);
-				}
+
+			// ReceiveNotary notary = new ReceiveNotary();
+
+
+			//if (!getMessageID.toString().isEmpty()) {
+			//	notary.setMessageId(messageId);
+			//	websocket.convertAndSend("/topic/receive-notary", notary);
+			//	}
+
 			System.out.println("[ETH-TX:]"+saveToBlockchain.toString());
 
 			// this doesn't work -- blocks since not async
@@ -87,9 +89,6 @@ public class MessageService extends Web3jService{
 			e.printStackTrace();
 			System.out.println("[ETH]Couldn't write to blockchain! Is geth running?");
 		}
-
-
-
 
     }
 }
