@@ -8,7 +8,7 @@ import java.io.File;
 
 public final class CredentialsHelper {
 	
-	private static final int userno = 1;
+	private static final int userno = 3;
     private static final String WALLET_DIR = "wallet/";
     private static final String DEFAULT_PASS = "test123";
     private static final String DEFAULT_USER = "default";

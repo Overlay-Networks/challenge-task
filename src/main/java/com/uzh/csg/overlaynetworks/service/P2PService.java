@@ -69,7 +69,7 @@ public class P2PService implements P2PClientDelegate {
 		client.sendMessage(message, result);
 		if (message.getNotary()) {
 			System.out.println("[ETH]Initiating FUTURE transaction.");
-			messageService.writeToBlockchain(message, result.getMessageId());
+			messageService.writeToBlockchain(message, result.getMessageId(),websocket);
 		}
 		return result;
 	}
@@ -122,6 +122,9 @@ public class P2PService implements P2PClientDelegate {
 			receiveMessage.setMessage(message.getMessage());
 			receiveMessage.setSender(from);
 			websocket.convertAndSend("/topic/receive-message", receiveMessage);
+			if (message.getNotary()) {
+				
+			}
 		} else if (error != null) {
 			String errorMessage = error.getErrorMessage();
 			LOGGER.log(Level.INFO, "Error receiving message: " + errorMessage);
